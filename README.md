@@ -1,6 +1,6 @@
 # Deadlock Counter Builder (Streamlit)
 
-A small, local Streamlit app that ranks **counter items** after you pick **six** enemy heroes. Data lives in JSON; images live under `assets/`. The recommendation math stays in plain Python so the UI stays easy to change.
+A small, local Streamlit app that ranks **counter items** after you pick **six** enemy heroes. Data based on various community data; images live under `assets/`. The recommendation math stays in plain Python so the UI stays easy to change.
 
 ## Why this layout?
 
