@@ -230,7 +230,7 @@ def main() -> None:
 
     with left:
         st.subheader("Enemy roster")
-        st.caption("Search by name. Streamlit’s multiselect cannot show images; icons appear below.")
+        st.caption("Search by name")
 
         selected = st.multiselect(
             "Choose enemy heroes",
