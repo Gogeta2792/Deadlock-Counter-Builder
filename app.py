@@ -25,6 +25,7 @@ MAX_SELECTIONS = 6
 
 HERO_ICON_WIDTH = 56
 ITEM_ICON_WIDTH = 52
+PER_HERO_ITEM_ICONS_PER_ROW = 10
 
 
 @st.cache_data
@@ -183,21 +184,22 @@ def render_per_hero_breakdown(
             with sub[1]:
                 st.markdown(f"**{hero_name}**")
                 if items:
-                    for it in items:
-                        ir, tr = st.columns([0.08, 0.92], gap="small")
-                        with ir:
-                            render_image_or_fallback(
-                                rel_path=item_icon_path(
-                                    game_data,
-                                    it,
-                                    project_root=PROJECT_ROOT,
-                                    categorized_index=item_icon_index,
-                                ),
-                                fallback_text=it,
-                                width=36,
-                            )
-                        with tr:
-                            st.markdown(it)
+                    for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
+                        chunk = items[row_start : row_start + PER_HERO_ITEM_ICONS_PER_ROW]
+                        cols = st.columns(len(chunk), gap="small")
+                        for col, it in zip(cols, chunk):
+                            with col:
+                                render_image_or_fallback(
+                                    rel_path=item_icon_path(
+                                        game_data,
+                                        it,
+                                        project_root=PROJECT_ROOT,
+                                        categorized_index=item_icon_index,
+                                    ),
+                                    fallback_text=it,
+                                    width=36,
+                                )
+                                st.caption(it)
                 else:
                     st.caption("No items listed for this hero.")
 
@@ -229,8 +231,7 @@ def main() -> None:
     left, right = st.columns([1, 1.35], gap="large")
 
     with left:
-        st.subheader("Enemy roster")
-        st.caption("Search by name")
+        st.subheader("Enemy gamers")
 
         selected = st.multiselect(
             "Choose enemy heroes",
