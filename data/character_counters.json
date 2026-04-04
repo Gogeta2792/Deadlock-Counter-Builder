@@ -1,0 +1,12 @@
+{
+  "Abrams": ["Knockdown", "Silence Glyph", "Healbane", "Decay"],
+  "Bebop": ["Debuff Remover", "Knockdown", "Reactive Barrier", "Curse"],
+  "Dynamo": ["Silence Glyph", "Knockdown", "Curse", "Unstoppable"],
+  "Grey Talon": ["Bullet Armor", "Divine Barrier", "Knockdown", "Silence Glyph"],
+  "Haze": ["Metal Skin", "Silence Glyph", "Knockdown", "Debuff Remover"],
+  "Infernus": ["Healbane", "Decay", "Spirit Armor", "Debuff Remover"],
+  "Ivy": ["Knockdown", "Curse", "Silence Glyph", "Unstoppable"],
+  "Kelvin": ["Debuff Remover", "Unstoppable", "Knockdown", "Curse"],
+  "Lash": ["Knockdown", "Debuff Remover", "Reactive Barrier", "Unstoppable"],
+  "McGinnis": ["Healbane", "Silence Glyph", "Curse", "Decay"]
+}
