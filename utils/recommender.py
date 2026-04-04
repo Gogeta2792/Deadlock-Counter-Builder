@@ -1,76 +1,36 @@
-"""Recommendation logic for Deadlock counter items."""
+"""Rank counter items by how many selected enemy heroes they cover."""
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import Dict, List
+from typing import List
 
-CharacterCounters = Dict[str, List[str]]
-
-
-class DataValidationError(ValueError):
-    """Raised when character counter data is malformed."""
-
-
-def load_character_counters(file_path: str | Path) -> CharacterCounters:
-    """Load and validate character counter data from a JSON file."""
-    path = Path(file_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Data file not found: {path}")
-
-    with path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    return validate_character_counters(data)
-
-
-def validate_character_counters(data: object) -> CharacterCounters:
-    """Validate data format: {character: [counter_item, ...]}"""
-    if not isinstance(data, dict):
-        raise DataValidationError("Top-level JSON value must be an object (dictionary).")
-
-    validated: CharacterCounters = {}
-
-    for character, items in data.items():
-        if not isinstance(character, str):
-            raise DataValidationError("All character names must be strings.")
-        if not isinstance(items, list):
-            raise DataValidationError(
-                f"Counter items for '{character}' must be a list of strings."
-            )
-        if not all(isinstance(item, str) for item in items):
-            raise DataValidationError(
-                f"Counter items for '{character}' must only contain strings."
-            )
-
-        # De-duplicate per character to avoid counting the same item twice for one character.
-        deduped_items = sorted(set(items))
-        validated[character] = deduped_items
-
-    return validated
+from utils.data_loader import GameData, counter_items_for_hero
 
 
 def recommend_items(
-    selected_characters: List[str],
-    character_counters: CharacterCounters,
+    selected_heroes: List[str],
+    game_data: GameData,
 ) -> List[dict]:
-    """Build ranked recommendations based on item frequency across selected characters."""
-    item_to_characters: Dict[str, set[str]] = {}
+    """
+    Count how many selected heroes each item counters.
 
-    for character in selected_characters:
-        items = character_counters.get(character, [])
-        for item in set(items):
-            item_to_characters.setdefault(item, set()).add(character)
+    Returns rows sorted by coverage (high first), then item name (A–Z).
+    Each row: ``item``, ``coverage_count``, ``countered_heroes`` (sorted names).
+    """
+    item_to_heroes: dict[str, set[str]] = {}
 
-    recommendations = [
+    for hero in selected_heroes:
+        for item in set(counter_items_for_hero(game_data, hero)):
+            item_to_heroes.setdefault(item, set()).add(hero)
+
+    rows = [
         {
             "item": item,
-            "coverage_count": len(countered_characters),
-            "countered_characters": sorted(countered_characters),
+            "coverage_count": len(heroes),
+            "countered_heroes": sorted(heroes),
         }
-        for item, countered_characters in item_to_characters.items()
+        for item, heroes in item_to_heroes.items()
     ]
 
-    recommendations.sort(key=lambda row: (-row["coverage_count"], row["item"].lower()))
-    return recommendations
+    rows.sort(key=lambda r: (-r["coverage_count"], r["item"].lower()))
+    return rows

@@ -1,40 +1,482 @@
 {
-  "Abrams": ["Slowing Hex", "Reactive Barrier", "Toxic Bullets", "Decay", "Crippling Headshot"],
-  "Apollo": ["Slowing Hex", "Healbane", "Counterspell", "Silence Wave", "Witchmail"],
-  "Bebop": ["Reactive Barrier", "Debuff Remover", "Counterspell", "Warp Stone", "Knockdown"],
-  "Billy": ["Rebuttal", "Counterspell", "Metal Skin", "Bullet Resilience", "Cursed Relic"],
-  "Calico": ["Rebuttal", "Slowing Hex", "Healbane", "Counterspell"],
-  "Celeste": ["Slowing Hex", "Knockdown", "Silence Wave", "Spirit Resilience", "Witchmail"],
-  "Doorman": ["Extra Stamina", "Reactive Barrier", "Counterspell", "Spellbreaker"],
-  "Drifter": ["Suppressor", "Debuff Remover", "Counterspell", "Metal Skin"],
-  "Dynamo": ["Slowing Hex", "Healbane", "Silence Wave", "Knockdown", "Unstoppable"],
-  "Graves": ["Healbane", "Debuff Remover", "Metal Skin", "Bullet Resilience"],
-  "Grey Talon": ["Spirit Shielding", "Knockdown", "Counterspell", "Spellbreaker", "Witchmail"],
-  "Haze": ["Suppressor", "Reactive Barrier", "Metal Skin", "Debuff Remover", "Plated Armor"],
-  "Holliday": ["Spirit Shielding", "Counterspell", "Warp Stone", "Knockdown", "Spellbreaker"],
-  "Infernus": ["Slowing Hex", "Suppressor", "Debuff Remover", "Spirit Resilience", "Plated Armor"],
-  "Ivy": ["Healbane", "Enduring Speed", "Knockdown", "Counterspell", "Silence Wave"],
-  "Kelvin": ["Healbane", "Enduring Speed", "Spirit Resilience", "Debuff Remover", "Toxic Bullets"],
-  "Lady Geist": ["Debuff Remover", "Silence Wave", "Decay", "Toxic Bullets", "Crippling Headshot"],
-  "Lash": ["Spirit Shielding", "Slowing Hex", "Counterspell", "Knockdown", "Spellbreaker"],
-  "McGinnis": ["Healbane", "Suppressor", "Knockdown", "Warp Stone", "Juggernaut"],
-  "Mina": ["Slowing Hex", "Silence Wave", "Phantom Strike", "Plated Armor", "Spellbreaker"],
-  "Mirage": ["Slowing Hex", "Debuff Remover", "Decay", "Cursed Relic"],
-  "Mo & Krill": ["Debuff Reducer", "Reactive Barrier", "Debuff Remover", "Toxic Bullets", "Cheat Death"],
-  "Paige": ["Reactive Barrier", "Debuff Remover", "Counterspell", "Spirit Resilience"],
-  "Paradox": ["Reactive Barrier", "Warp Stone", "Debuff Remover", "Spellbreaker"],
-  "Pocket": ["Slowing Hex", "Counterspell", "Silence Wave", "Spellbreaker", "Divine Barrier"],
-  "Rem": ["Monster Rounds", "Healbane", "Slowing Hex", "Counterspell"],
-  "Seven": ["Reactive Barrier", "Spirit Resilience", "Debuff Remover", "Knockdown", "Witchmail"],
-  "Shiv": ["Spirit Sap", "Debuff Remover", "Decay", "Toxic Bullets", "Crippling Headshot"],
-  "Silver": ["Metal Skin", "Bullet Resilience", "Debuff Remover", "Decay", "Silence Wave"],
-  "Sinclair": ["Slowing Hex", "Reactive Barrier", "Counterspell", "Spirit Resilience"],
-  "Venator": ["Debuff Reducer", "Reactive Barrier", "Metal Skin", "Debuff Remover", "Counterspell"],
-  "Victor": ["Healbane", "Silence Wave", "Crippling Headshot", "Silencer", "Cursed Relic"],
-  "Vindicta": ["Suppressor", "Knockdown", "Debuff Remover", "Phantom Strike"],
-  "Viscous": ["Rebuttal", "Silence Wave", "Cursed Relic"],
-  "Vyper": ["Extra Health", "Suppressor", "Reactive Barrier", "Debuff Remover", "Metal Skin"],
-  "Warden": ["Extra Stamina", "Healbane", "Suppressor", "Debuff Remover", "Juggernaut"],
-  "Wraith": ["Slowing Hex", "Suppressor", "Spirit Resilience", "Ethereal Shift", "Divine Barrier"],
-  "Yamato": ["Healbane", "Counterspell", "Silence Wave", "Spellbreaker", "Crippling Headshot"]
+  "heroes": {
+    "Abrams": {
+      "icon": "assets/heroes/132px-Abrams_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Reactive Barrier",
+        "Toxic Bullets",
+        "Decay",
+        "Crippling Headshot"
+      ]
+    },
+    "Apollo": {
+      "icon": "assets/heroes/132px-Apollo_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Healbane",
+        "Counterspell",
+        "Silence Wave",
+        "Witchmail"
+      ]
+    },
+    "Bebop": {
+      "icon": "assets/heroes/132px-Bebop_card.png",
+      "counter_items": [
+        "Reactive Barrier",
+        "Debuff Remover",
+        "Counterspell",
+        "Warp Stone",
+        "Knockdown"
+      ]
+    },
+    "Billy": {
+      "icon": "assets/heroes/132px-Billy_card.png",
+      "counter_items": [
+        "Rebuttal",
+        "Counterspell",
+        "Metal Skin",
+        "Bullet Resilience",
+        "Cursed Relic"
+      ]
+    },
+    "Calico": {
+      "icon": "assets/heroes/132px-Calico_card.png",
+      "counter_items": [
+        "Rebuttal",
+        "Slowing Hex",
+        "Healbane",
+        "Counterspell"
+      ]
+    },
+    "Celeste": {
+      "icon": "assets/heroes/132px-Celeste_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Knockdown",
+        "Silence Wave",
+        "Spirit Resilience",
+        "Witchmail"
+      ]
+    },
+    "Doorman": {
+      "icon": "assets/heroes/132px-Doorman_card.png",
+      "counter_items": [
+        "Extra Stamina",
+        "Reactive Barrier",
+        "Counterspell",
+        "Spellbreaker"
+      ]
+    },
+    "Drifter": {
+      "icon": "assets/heroes/132px-Drifter_card.png",
+      "counter_items": [
+        "Suppressor",
+        "Debuff Remover",
+        "Counterspell",
+        "Metal Skin"
+      ]
+    },
+    "Dynamo": {
+      "icon": "assets/heroes/132px-Dynamo_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Healbane",
+        "Silence Wave",
+        "Knockdown",
+        "Unstoppable"
+      ]
+    },
+    "Graves": {
+      "icon": "assets/heroes/132px-Graves_card.png",
+      "counter_items": [
+        "Healbane",
+        "Debuff Remover",
+        "Metal Skin",
+        "Bullet Resilience"
+      ]
+    },
+    "Grey Talon": {
+      "icon": "assets/heroes/132px-Grey_Talon_card.png",
+      "counter_items": [
+        "Spirit Shielding",
+        "Knockdown",
+        "Counterspell",
+        "Spellbreaker",
+        "Witchmail"
+      ]
+    },
+    "Haze": {
+      "icon": "assets/heroes/132px-Haze_card.png",
+      "counter_items": [
+        "Suppressor",
+        "Reactive Barrier",
+        "Metal Skin",
+        "Debuff Remover",
+        "Plated Armor"
+      ]
+    },
+    "Holliday": {
+      "icon": "assets/heroes/132px-Holliday_card.png",
+      "counter_items": [
+        "Spirit Shielding",
+        "Counterspell",
+        "Warp Stone",
+        "Knockdown",
+        "Spellbreaker"
+      ]
+    },
+    "Infernus": {
+      "icon": "assets/heroes/132px-Infernus_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Suppressor",
+        "Debuff Remover",
+        "Spirit Resilience",
+        "Plated Armor"
+      ]
+    },
+    "Ivy": {
+      "icon": "assets/heroes/132px-Ivy_card.png",
+      "counter_items": [
+        "Healbane",
+        "Enduring Speed",
+        "Knockdown",
+        "Counterspell",
+        "Silence Wave"
+      ]
+    },
+    "Kelvin": {
+      "icon": "assets/heroes/132px-Kelvin_card.png",
+      "counter_items": [
+        "Healbane",
+        "Enduring Speed",
+        "Spirit Resilience",
+        "Debuff Remover",
+        "Toxic Bullets"
+      ]
+    },
+    "Lady Geist": {
+      "icon": "assets/heroes/132px-Lady_Geist_card.png",
+      "counter_items": [
+        "Debuff Remover",
+        "Silence Wave",
+        "Decay",
+        "Toxic Bullets",
+        "Crippling Headshot"
+      ]
+    },
+    "Lash": {
+      "icon": "assets/heroes/132px-Lash_card.png",
+      "counter_items": [
+        "Spirit Shielding",
+        "Slowing Hex",
+        "Counterspell",
+        "Knockdown",
+        "Spellbreaker"
+      ]
+    },
+    "McGinnis": {
+      "icon": "assets/heroes/132px-McGinnis_card.png",
+      "counter_items": [
+        "Healbane",
+        "Suppressor",
+        "Knockdown",
+        "Warp Stone",
+        "Juggernaut"
+      ]
+    },
+    "Mina": {
+      "icon": "assets/heroes/132px-Mina_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Silence Wave",
+        "Phantom Strike",
+        "Plated Armor",
+        "Spellbreaker"
+      ]
+    },
+    "Mirage": {
+      "icon": "assets/heroes/132px-Mirage_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Debuff Remover",
+        "Decay",
+        "Cursed Relic"
+      ]
+    },
+    "Mo & Krill": {
+      "icon": "assets/heroes/132px-Mo_&_Krill_card.png",
+      "counter_items": [
+        "Debuff Reducer",
+        "Reactive Barrier",
+        "Debuff Remover",
+        "Toxic Bullets",
+        "Cheat Death"
+      ]
+    },
+    "Paige": {
+      "icon": "assets/heroes/132px-Paige_card.png",
+      "counter_items": [
+        "Reactive Barrier",
+        "Debuff Remover",
+        "Counterspell",
+        "Spirit Resilience"
+      ]
+    },
+    "Paradox": {
+      "icon": "assets/heroes/132px-Paradox_card.png",
+      "counter_items": [
+        "Reactive Barrier",
+        "Warp Stone",
+        "Debuff Remover",
+        "Spellbreaker"
+      ]
+    },
+    "Pocket": {
+      "icon": "assets/heroes/132px-Pocket_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Counterspell",
+        "Silence Wave",
+        "Spellbreaker",
+        "Divine Barrier"
+      ]
+    },
+    "Rem": {
+      "icon": "assets/heroes/132px-Rem_card.png",
+      "counter_items": [
+        "Monster Rounds",
+        "Healbane",
+        "Slowing Hex",
+        "Counterspell"
+      ]
+    },
+    "Seven": {
+      "icon": "assets/heroes/132px-Seven_card.png",
+      "counter_items": [
+        "Reactive Barrier",
+        "Spirit Resilience",
+        "Debuff Remover",
+        "Knockdown",
+        "Witchmail"
+      ]
+    },
+    "Shiv": {
+      "icon": "assets/heroes/132px-Shiv_card.png",
+      "counter_items": [
+        "Spirit Sap",
+        "Debuff Remover",
+        "Decay",
+        "Toxic Bullets",
+        "Crippling Headshot"
+      ]
+    },
+    "Silver": {
+      "icon": "assets/heroes/132px-Silver_card.png",
+      "counter_items": [
+        "Metal Skin",
+        "Bullet Resilience",
+        "Debuff Remover",
+        "Decay",
+        "Silence Wave"
+      ]
+    },
+    "Sinclair": {
+      "icon": "assets/heroes/132px-Sinclair_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Reactive Barrier",
+        "Counterspell",
+        "Spirit Resilience"
+      ]
+    },
+    "Venator": {
+      "icon": "assets/heroes/132px-Venator_card.png",
+      "counter_items": [
+        "Debuff Reducer",
+        "Reactive Barrier",
+        "Metal Skin",
+        "Debuff Remover",
+        "Counterspell"
+      ]
+    },
+    "Victor": {
+      "icon": "assets/heroes/132px-Victor_card.png",
+      "counter_items": [
+        "Healbane",
+        "Silence Wave",
+        "Crippling Headshot",
+        "Silencer",
+        "Cursed Relic"
+      ]
+    },
+    "Vindicta": {
+      "icon": "assets/heroes/132px-Vindicta_card.png",
+      "counter_items": [
+        "Suppressor",
+        "Knockdown",
+        "Debuff Remover",
+        "Phantom Strike"
+      ]
+    },
+    "Viscous": {
+      "icon": "assets/heroes/132px-Viscous_card.png",
+      "counter_items": [
+        "Rebuttal",
+        "Silence Wave",
+        "Cursed Relic"
+      ]
+    },
+    "Vyper": {
+      "icon": "assets/heroes/132px-Vyper_card.png",
+      "counter_items": [
+        "Extra Health",
+        "Suppressor",
+        "Reactive Barrier",
+        "Debuff Remover",
+        "Metal Skin"
+      ]
+    },
+    "Warden": {
+      "icon": "assets/heroes/132px-Warden_card.png",
+      "counter_items": [
+        "Extra Stamina",
+        "Healbane",
+        "Suppressor",
+        "Debuff Remover",
+        "Juggernaut"
+      ]
+    },
+    "Wraith": {
+      "icon": "assets/heroes/132px-Wraith_card.png",
+      "counter_items": [
+        "Slowing Hex",
+        "Suppressor",
+        "Spirit Resilience",
+        "Ethereal Shift",
+        "Divine Barrier"
+      ]
+    },
+    "Yamato": {
+      "icon": "assets/heroes/132px-Yamato_card.png",
+      "counter_items": [
+        "Healbane",
+        "Counterspell",
+        "Silence Wave",
+        "Spellbreaker",
+        "Crippling Headshot"
+      ]
+    }
+  },
+  "items": {
+    "Bullet Resilience": {
+      "icon": "assets/items/bullet_resilience.png"
+    },
+    "Cheat Death": {
+      "icon": "assets/items/cheat_death.png"
+    },
+    "Counterspell": {
+      "icon": "assets/items/counterspell.png"
+    },
+    "Crippling Headshot": {
+      "icon": "assets/items/crippling_headshot.png"
+    },
+    "Cursed Relic": {
+      "icon": "assets/items/cursed_relic.png"
+    },
+    "Debuff Reducer": {
+      "icon": "assets/items/debuff_reducer.png"
+    },
+    "Debuff Remover": {
+      "icon": "assets/items/debuff_remover.png"
+    },
+    "Decay": {
+      "icon": "assets/items/decay.png"
+    },
+    "Divine Barrier": {
+      "icon": "assets/items/divine_barrier.png"
+    },
+    "Enduring Speed": {
+      "icon": "assets/items/enduring_speed.png"
+    },
+    "Ethereal Shift": {
+      "icon": "assets/items/ethereal_shift.png"
+    },
+    "Extra Health": {
+      "icon": "assets/items/extra_health.png"
+    },
+    "Extra Stamina": {
+      "icon": "assets/items/extra_stamina.png"
+    },
+    "Healbane": {
+      "icon": "assets/items/healbane.png"
+    },
+    "Juggernaut": {
+      "icon": "assets/items/juggernaut.png"
+    },
+    "Knockdown": {
+      "icon": "assets/items/knockdown.png"
+    },
+    "Metal Skin": {
+      "icon": "assets/items/metal_skin.png"
+    },
+    "Monster Rounds": {
+      "icon": "assets/items/monster_rounds.png"
+    },
+    "Phantom Strike": {
+      "icon": "assets/items/phantom_strike.png"
+    },
+    "Plated Armor": {
+      "icon": "assets/items/plated_armor.png"
+    },
+    "Reactive Barrier": {
+      "icon": "assets/items/reactive_barrier.png"
+    },
+    "Rebuttal": {
+      "icon": "assets/items/rebuttal.png"
+    },
+    "Silence Wave": {
+      "icon": "assets/items/silence_wave.png"
+    },
+    "Silencer": {
+      "icon": "assets/items/silencer.png"
+    },
+    "Slowing Hex": {
+      "icon": "assets/items/slowing_hex.png"
+    },
+    "Spellbreaker": {
+      "icon": "assets/items/spellbreaker.png"
+    },
+    "Spirit Resilience": {
+      "icon": "assets/items/spirit_resilience.png"
+    },
+    "Spirit Sap": {
+      "icon": "assets/items/spirit_sap.png"
+    },
+    "Spirit Shielding": {
+      "icon": "assets/items/spirit_shielding.png"
+    },
+    "Suppressor": {
+      "icon": "assets/items/suppressor.png"
+    },
+    "Toxic Bullets": {
+      "icon": "assets/items/toxic_bullets.png"
+    },
+    "Unstoppable": {
+      "icon": "assets/items/unstoppable.png"
+    },
+    "Warp Stone": {
+      "icon": "assets/items/warp_stone.png"
+    },
+    "Witchmail": {
+      "icon": "assets/items/witchmail.png"
+    },
+    "(Example) New Item Alpha": {
+      "icon": "assets/items/example_new_item_alpha.png"
+    },
+    "(Example) New Item Beta": {
+      "icon": "assets/items/example_new_item_beta.png"
+    }
+  }
 }
