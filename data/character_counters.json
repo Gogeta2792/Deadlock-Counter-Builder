@@ -24,7 +24,7 @@
       "icon": "assets/heroes/132px-Bebop_card.png",
       "counter_items": [
         "Reactive Barrier",
-        "Debuff Remover",
+        "Dispel Magic",
         "Counterspell",
         "Warp Stone",
         "Knockdown"
@@ -72,7 +72,7 @@
       "icon": "assets/heroes/132px-Drifter_card.png",
       "counter_items": [
         "Suppressor",
-        "Debuff Remover",
+        "Dispel Magic",
         "Counterspell",
         "Metal Skin"
       ]
@@ -91,7 +91,7 @@
       "icon": "assets/heroes/132px-Graves_card.png",
       "counter_items": [
         "Healbane",
-        "Debuff Remover",
+        "Dispel Magic",
         "Metal Skin",
         "Bullet Resilience"
       ]
@@ -112,7 +112,7 @@
         "Suppressor",
         "Reactive Barrier",
         "Metal Skin",
-        "Debuff Remover",
+        "Dispel Magic",
         "Plated Armor"
       ]
     },
@@ -131,7 +131,7 @@
       "counter_items": [
         "Slowing Hex",
         "Suppressor",
-        "Debuff Remover",
+        "Dispel Magic",
         "Spirit Resilience",
         "Plated Armor"
       ]
@@ -152,14 +152,14 @@
         "Healbane",
         "Enduring Speed",
         "Spirit Resilience",
-        "Debuff Remover",
+        "Dispel Magic",
         "Toxic Bullets"
       ]
     },
     "Lady Geist": {
       "icon": "assets/heroes/132px-Lady_Geist_card.png",
       "counter_items": [
-        "Debuff Remover",
+        "Dispel Magic",
         "Silence Wave",
         "Decay",
         "Toxic Bullets",
@@ -200,7 +200,7 @@
       "icon": "assets/heroes/132px-Mirage_card.png",
       "counter_items": [
         "Slowing Hex",
-        "Debuff Remover",
+        "Dispel Magic",
         "Decay",
         "Cursed Relic"
       ]
@@ -210,7 +210,7 @@
       "counter_items": [
         "Debuff Reducer",
         "Reactive Barrier",
-        "Debuff Remover",
+        "Dispel Magic",
         "Toxic Bullets",
         "Cheat Death"
       ]
@@ -219,7 +219,7 @@
       "icon": "assets/heroes/132px-Paige_card.png",
       "counter_items": [
         "Reactive Barrier",
-        "Debuff Remover",
+        "Dispel Magic",
         "Counterspell",
         "Spirit Resilience"
       ]
@@ -229,7 +229,7 @@
       "counter_items": [
         "Reactive Barrier",
         "Warp Stone",
-        "Debuff Remover",
+        "Dispel Magic",
         "Spellbreaker"
       ]
     },
@@ -257,7 +257,7 @@
       "counter_items": [
         "Reactive Barrier",
         "Spirit Resilience",
-        "Debuff Remover",
+        "Dispel Magic",
         "Knockdown",
         "Witchmail"
       ]
@@ -266,7 +266,7 @@
       "icon": "assets/heroes/132px-Shiv_card.png",
       "counter_items": [
         "Spirit Sap",
-        "Debuff Remover",
+        "Dispel Magic",
         "Decay",
         "Toxic Bullets",
         "Crippling Headshot"
@@ -277,7 +277,7 @@
       "counter_items": [
         "Metal Skin",
         "Bullet Resilience",
-        "Debuff Remover",
+        "Dispel Magic",
         "Decay",
         "Silence Wave"
       ]
@@ -297,7 +297,7 @@
         "Debuff Reducer",
         "Reactive Barrier",
         "Metal Skin",
-        "Debuff Remover",
+        "Dispel Magic",
         "Counterspell"
       ]
     },
@@ -316,7 +316,7 @@
       "counter_items": [
         "Suppressor",
         "Knockdown",
-        "Debuff Remover",
+        "Dispel Magic",
         "Phantom Strike"
       ]
     },
@@ -334,7 +334,7 @@
         "Extra Health",
         "Suppressor",
         "Reactive Barrier",
-        "Debuff Remover",
+        "Dispel Magic",
         "Metal Skin"
       ]
     },
@@ -344,7 +344,7 @@
         "Extra Stamina",
         "Healbane",
         "Suppressor",
-        "Debuff Remover",
+        "Dispel Magic",
         "Juggernaut"
       ]
     },
@@ -388,8 +388,8 @@
     "Debuff Reducer": {
       "icon": "assets/items/debuff_reducer.png"
     },
-    "Debuff Remover": {
-      "icon": "assets/items/debuff_remover.png"
+    "Dispel Magic": {
+      "icon": "assets/items/Vitality/DispelMagic.png"
     },
     "Decay": {
       "icon": "assets/items/decay.png"

@@ -9,6 +9,7 @@ import streamlit as st
 
 from utils.data_loader import (
     DataValidationError,
+    build_categorized_item_icon_index,
     counter_items_for_hero,
     hero_icon_path,
     item_icon_path,
@@ -29,6 +30,11 @@ ITEM_ICON_WIDTH = 52
 @st.cache_data
 def get_game_data_cached(path_str: str) -> dict:
     return load_game_data(path_str)
+
+
+@st.cache_data
+def get_item_icon_index_cached(root_str: str) -> dict[str, str]:
+    return build_categorized_item_icon_index(Path(root_str))
 
 
 def reset_selection() -> None:
@@ -103,7 +109,9 @@ def render_countered_heroes_chips(game_data: dict, hero_names: list[str]) -> Non
             st.caption(hero_name)
 
 
-def render_recommendations(selected: list[str], game_data: dict) -> None:
+def render_recommendations(
+    selected: list[str], game_data: dict, item_icon_index: dict[str, str]
+) -> None:
     n = len(selected)
     rows = recommend_items(selected, game_data)
 
@@ -127,7 +135,12 @@ def render_recommendations(selected: list[str], game_data: dict) -> None:
         else:
             strength = "Situational"
 
-        item_rel = item_icon_path(game_data, item_name)
+        item_rel = item_icon_path(
+            game_data,
+            item_name,
+            project_root=PROJECT_ROOT,
+            categorized_index=item_icon_index,
+        )
 
         with st.container(border=True):
             head = st.columns([0.12, 0.58, 0.30], gap="medium")
@@ -154,7 +167,9 @@ def render_recommendations(selected: list[str], game_data: dict) -> None:
             render_countered_heroes_chips(game_data, countered)
 
 
-def render_per_hero_breakdown(selected: list[str], game_data: dict) -> None:
+def render_per_hero_breakdown(
+    selected: list[str], game_data: dict, item_icon_index: dict[str, str]
+) -> None:
     with st.expander("Per-hero counter lists", expanded=False):
         for hero_name in selected:
             items = counter_items_for_hero(game_data, hero_name)
@@ -172,7 +187,12 @@ def render_per_hero_breakdown(selected: list[str], game_data: dict) -> None:
                         ir, tr = st.columns([0.08, 0.92], gap="small")
                         with ir:
                             render_image_or_fallback(
-                                rel_path=item_icon_path(game_data, it),
+                                rel_path=item_icon_path(
+                                    game_data,
+                                    it,
+                                    project_root=PROJECT_ROOT,
+                                    categorized_index=item_icon_index,
+                                ),
                                 fallback_text=it,
                                 width=36,
                             )
@@ -203,6 +223,7 @@ def main() -> None:
         st.error(f"Unexpected error while loading data: {err}")
         st.stop()
 
+    item_icon_index = get_item_icon_index_cached(str(PROJECT_ROOT))
     all_heroes = sorted_hero_names(game_data)
 
     left, right = st.columns([1, 1.35], gap="large")
@@ -232,11 +253,11 @@ def main() -> None:
         if len(selected) < MAX_SELECTIONS:
             st.info(f"Choose **{MAX_SELECTIONS - len(selected)}** more hero(es) to see recommendations.")
         elif len(selected) == MAX_SELECTIONS:
-            render_per_hero_breakdown(selected, game_data)
+            render_per_hero_breakdown(selected, game_data, item_icon_index)
 
     with right:
         if len(selected) == MAX_SELECTIONS:
-            render_recommendations(selected, game_data)
+            render_recommendations(selected, game_data, item_icon_index)
         else:
             st.subheader("Recommended counter items")
             st.info(
