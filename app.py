@@ -27,6 +27,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_PATH = PROJECT_ROOT / "data" / "character_counters.json"
 MAX_SELECTIONS = 6
 MAX_PURCHASED_ITEMS = 12
+PAGE_LOGO_REL_PATH = "assets/(Classic) LOGO_Filled.png"
+# JPEG resized from assets/Background_Alley (Full).png — full PNG is too large to embed in CSS.
+PAGE_BACKGROUND_WEB_REL_PATH = "assets/Background_Alley_bg.jpg"
 
 HERO_ICON_WIDTH = 56
 ITEM_ICON_WIDTH = 52
@@ -57,11 +60,133 @@ def _cached_asset_data_uri(path_and_mtime: tuple[str, float]) -> tuple[str, str]
     return mime, b64
 
 
-def inject_responsive_css() -> None:
+def _page_background_photo_css_url() -> str | None:
+    """Return a CSS url(...) for the alley background, or None if the asset is missing."""
+    resolved = resolve_asset_path(PROJECT_ROOT, PAGE_BACKGROUND_WEB_REL_PATH)
+    if resolved is None:
+        return None
+    mime, b64 = _cached_asset_data_uri((str(resolved), resolved.stat().st_mtime))
+    return f'url("data:{mime};base64,{b64}")'
+
+
+def inject_responsive_css(*, page_background_photo: str | None = None) -> None:
     """Inject layout, typography, component polish, and responsive keyed-container rules."""
+    bg_block = ""
+    if page_background_photo:
+        bg_block = f"""
+/* --- Full-page background (alley art + overlays for readability) --- */
+.stApp {{
+  --dcb-bg-photo: {page_background_photo};
+  background-color: #07090f;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(8, 10, 18, 0.86) 0%,
+      rgba(8, 10, 18, 0.68) 42%,
+      rgba(6, 8, 14, 0.8) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.48) 0%,
+      rgba(0, 0, 0, 0.08) 24%,
+      rgba(0, 0, 0, 0.08) 76%,
+      rgba(0, 0, 0, 0.48) 100%
+    ),
+    var(--dcb-bg-photo);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}}
+@media (max-width: 900px) {{
+  .stApp {{ background-attachment: scroll; }}
+}}
+[data-theme="light"] .stApp {{
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(248, 249, 252, 0.88) 0%,
+      rgba(236, 240, 250, 0.78) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 10, 18, 0.5) 0%,
+      rgba(6, 8, 14, 0.55) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.22) 0%,
+      rgba(0, 0, 0, 0.04) 26%,
+      rgba(0, 0, 0, 0.04) 74%,
+      rgba(0, 0, 0, 0.22) 100%
+    ),
+    var(--dcb-bg-photo);
+}}
+[data-testid="stAppViewContainer"],
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] {{
+  background: transparent !important;
+}}
+header[data-testid="stHeader"] {{
+  background: linear-gradient(180deg, rgba(6, 8, 14, 0.9), rgba(6, 8, 14, 0.45)) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}}
+[data-theme="light"] header[data-testid="stHeader"] {{
+  background: linear-gradient(180deg, rgba(252, 252, 254, 0.92), rgba(252, 252, 254, 0.65)) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}}
+section[data-testid="stSidebar"] {{
+  background: rgba(14, 16, 26, 0.78) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}}
+section[data-testid="stSidebar"] > div {{
+  background: transparent !important;
+}}
+[data-theme="light"] section[data-testid="stSidebar"] {{
+  background: rgba(252, 252, 254, 0.92) !important;
+  border-right-color: rgba(15, 23, 42, 0.08);
+}}
+.main .block-container {{
+  background: rgba(18, 21, 34, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.38);
+}}
+[data-theme="light"] .main .block-container {{
+  background: rgba(252, 252, 254, 0.9);
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+}}
+[data-testid="stVerticalBlockBorderWrapper"] {{
+  background: rgba(24, 28, 45, 0.88) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+}}
+[data-theme="light"] [data-testid="stVerticalBlockBorderWrapper"] {{
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.08);
+}}
+.dcb-page-head {{
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}}
+[data-theme="light"] .dcb-page-head {{
+  border-bottom-color: rgba(15, 23, 42, 0.12);
+}}
+"""
     st.markdown(
-        """
-<style>
+        "<style>\n"
+        + bg_block
+        + """
 /* --- Layout & page chrome --- */
 .main .block-container {
   padding-top: 1.75rem;
@@ -70,13 +195,14 @@ def inject_responsive_css() -> None:
   padding-right: max(1.25rem, 2.5vw);
 }
 .dcb-page-head {
-  margin: 0 0 1.75rem 0;
+  margin: 0 auto 1.75rem auto;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--st-border-color);
   max-width: 48rem;
+  text-align: center;
 }
 .dcb-page-title {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   padding: 0;
   font-size: clamp(1.65rem, 2.2vw, 2rem);
   font-weight: 700;
@@ -84,16 +210,12 @@ def inject_responsive_css() -> None:
   line-height: 1.2;
   color: var(--st-text-color);
 }
-.dcb-page-subtitle {
-  margin: 0;
-  padding: 0;
-  font-size: 1.02rem;
-  line-height: 1.55;
-  color: var(--st-gray-text-color, #5c6070);
-}
-.dcb-page-subtitle strong {
-  font-weight: 600;
-  color: var(--st-text-color);
+.dcb-page-logo {
+  display: block;
+  width: min(300px, 100%);
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 1rem auto;
 }
 /* Section rhythm in main column only (avoids sidebar) */
 section.main h3 {
@@ -307,6 +429,18 @@ section.main [data-testid="stMultiSelect"] [data-testid="stWidgetLabel"] {
 </style>
 """,
         unsafe_allow_html=True,
+    )
+
+
+def _page_head_logo_html() -> str:
+    """Inline logo for the page header; empty if the asset is missing."""
+    resolved = resolve_asset_path(PROJECT_ROOT, PAGE_LOGO_REL_PATH)
+    if resolved is None:
+        return ""
+    mime, b64 = _cached_asset_data_uri((str(resolved), resolved.stat().st_mtime))
+    safe_alt = html.escape("Deadlock", quote=True)
+    return (
+        f'<img class="dcb-page-logo" src="data:{mime};base64,{b64}" alt="{safe_alt}" />'
     )
 
 
@@ -666,13 +800,14 @@ def render_selected_enemies_counter_lists(
 
 def main() -> None:
     st.set_page_config(page_title="Deadlock Counter Builder", page_icon="🍞", layout="wide")
-    inject_responsive_css()
+    inject_responsive_css(page_background_photo=_page_background_photo_css_url())
 
+    logo_html = _page_head_logo_html()
     st.markdown(
-        """
+        f"""
         <div class="dcb-page-head">
-          <h1 class="dcb-page-title">Deadlock Counter Builder</h1>
-          <p class="dcb-page-subtitle">Select <strong>6</strong> enemy heroes. Recommendations rank items by how many of those six each item counters.</p>
+          {logo_html}
+          <h1 class="dcb-page-title">Bread's Counter Builder</h1>
         </div>
         """,
         unsafe_allow_html=True,
