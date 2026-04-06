@@ -315,23 +315,30 @@ def render_recommendations(
     *,
     exclude_items: Collection[str] | None = None,
 ) -> None:
-    n = len(selected)
     skip = frozenset(exclude_items or ())
-    rows = [r for r in recommend_items(selected, game_data) if r["item"] not in skip]
+    all_rows = recommend_items(selected, game_data)
+    candidates = [r for r in all_rows if r["item"] not in skip]
+    rows = [r for r in candidates if r["coverage_count"] > 1]
 
     st.subheader("Recommended counter items")
     st.caption(
         "Sorted by how many of your selected enemies each item counters. "
+        "Items that only counter one enemy are listed under that hero in **Selected Enemies**."
     )
 
     if not rows:
-        if skip:
+        if not all_rows:
+            st.info("No counter items were found for the current selection.")
+        elif not candidates:
             st.info(
                 "No counter items left to show — try removing some items from **Already owned**, "
                 "or your selection may not share any remaining counters."
             )
         else:
-            st.info("No counter items were found for the current selection.")
+            st.info(
+                "No items counter more than one of your selected enemies. "
+                "See **Selected Enemies** for per-hero counter items."
+            )
         return
 
     def render_one_recommendation_card(row: dict) -> None:
