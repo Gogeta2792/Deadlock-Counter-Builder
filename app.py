@@ -777,7 +777,6 @@ def render_selected_enemies_counter_lists(
                                             on_click=sell_purchased_item,
                                             args=(it,),
                                             type="secondary",
-                                            use_container_width=True,
                                         )
                                     else:
                                         buy_disabled = excluded or (
@@ -789,7 +788,6 @@ def render_selected_enemies_counter_lists(
                                             on_click=add_purchased_item,
                                             args=(it,),
                                             type="secondary",
-                                            use_container_width=True,
                                             disabled=buy_disabled,
                                         )
                     else:
