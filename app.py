@@ -115,6 +115,47 @@ def inject_responsive_css() -> None:
   max-width: 100%;
   height: auto;
 }
+/* Icon-grid labels: shrink to fit column width; wrap only at spaces (no mid-word breaks). */
+.dcb-label-fit {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  margin: 0.15rem 0 0 0;
+  line-height: 1.25;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none;
+  color: var(--text-color, #31333F);
+  opacity: 0.65;
+  font-size: 0.75rem;
+}
+@supports (font-size: 1cqi) {
+  .dcb-label-fit {
+    container-type: inline-size;
+    font-size: max(0.55rem, min(0.8125rem, calc(100cqi / (var(--label-chars, 8) * 0.52))));
+  }
+}
+.dcb-label-fit.dcb-owned-line {
+  opacity: 1;
+  color: #718096;
+}
+.dcb-title-fit {
+  margin: 0 0 0.35rem 0;
+  padding: 0;
+  font-weight: 600;
+  line-height: 1.2;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none;
+  color: var(--text-color, #31333F);
+  font-size: 1.2rem;
+}
+@supports (font-size: 1cqi) {
+  .dcb-title-fit {
+    container-type: inline-size;
+    font-size: max(0.8rem, min(1.35rem, calc(100cqi / (var(--label-chars, 8) * 0.45))));
+  }
+}
 </style>
 """,
         unsafe_allow_html=True,
@@ -157,6 +198,34 @@ def get_item_icon_index_cached(root_str: str) -> dict[str, str]:
 
 def reset_selection() -> None:
     st.session_state["enemy_selection"] = []
+
+
+def _label_fit_longest_token_len(text: str) -> int:
+    """Length of longest whitespace-delimited segment; used to size text so one word fits."""
+    parts = text.split()
+    if not parts:
+        return 1
+    return max(len(p) for p in parts)
+
+
+def render_icon_caption_label(text: str) -> None:
+    """Caption under a narrow icon tile: scales down long names; wraps only between words."""
+    metric = _label_fit_longest_token_len(text)
+    escaped = html.escape(text)
+    st.markdown(
+        f'<div class="dcb-label-fit" style="--label-chars:{metric}">{escaped}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_card_title_label(text: str) -> None:
+    """Item title in recommendation cards; same word rules with a larger type scale."""
+    metric = _label_fit_longest_token_len(text)
+    escaped = html.escape(text)
+    st.markdown(
+        f'<p class="dcb-title-fit" style="--label-chars:{metric}">{escaped}</p>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_image_or_fallback(
@@ -212,7 +281,7 @@ def render_countered_heroes_chips(game_data: dict, hero_names: list[str]) -> Non
                 fallback_text=hero_name,
                 width=40,
             )
-            st.caption(hero_name)
+            render_icon_caption_label(hero_name)
 
 
 def render_recommendations(
@@ -245,14 +314,6 @@ def render_recommendations(
         coverage = row["coverage_count"]
         item_name = row["item"]
         countered = row["countered_heroes"]
-        ratio = coverage / n if n else 0.0
-
-        if coverage >= max(1, n - 1):
-            strength = "Strong coverage"
-        elif coverage >= max(1, n // 2):
-            strength = "Solid pick"
-        else:
-            strength = "Situational"
 
         item_rel = item_icon_path(
             game_data,
@@ -280,13 +341,11 @@ def render_recommendations(
                         use_container_width=True,
                     )
                 with head[1]:
-                    st.markdown(f"### {item_name}")
+                    render_card_title_label(item_name)
                     st.markdown(
-                        f"**Counters {coverage}/{n} selected heroes** — _{strength}_"
+                        f"**Counters {coverage}/{n} selected heroes**"
                     )
-                    st.progress(ratio, text=f"{int(ratio * 100)}% of selected roster")
 
-            st.markdown("**Covered heroes**")
             render_countered_heroes_chips(game_data, countered)
 
     for row_start in range(0, len(rows), 2):
@@ -342,7 +401,7 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
                     fallback_text=item_name,
                     width=PURCHASED_ITEM_ICON_WIDTH,
                 )
-                st.caption(item_name)
+                render_icon_caption_label(item_name)
                 st.button(
                     "Remove",
                     key=_purchased_item_button_key(item_name),
@@ -375,7 +434,7 @@ def render_selected_enemies_counter_lists(
                     fallback_text=hero_name,
                     width=HERO_ICON_WIDTH,
                 )
-                st.caption(hero_name)
+                render_icon_caption_label(hero_name)
             with sub[1]:
                 if items:
                     for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
@@ -396,14 +455,15 @@ def render_selected_enemies_counter_lists(
                                     greyed_out=is_owned,
                                 )
                                 if is_owned:
+                                    metric = _label_fit_longest_token_len(it)
                                     st.markdown(
-                                        f'<p style="margin:0.15rem 0 0 0;color:#718096;'
-                                        f'font-size:0.82rem;text-decoration:line-through;">'
+                                        f'<p class="dcb-label-fit dcb-owned-line" '
+                                        f'style="--label-chars:{metric};text-decoration:line-through;">'
                                         f"{html.escape(it)}</p>",
                                         unsafe_allow_html=True,
                                     )
                                 else:
-                                    st.caption(it)
+                                    render_icon_caption_label(it)
                 else:
                     st.caption("No items listed for this hero.")
         if i < len(selected) - 1:
