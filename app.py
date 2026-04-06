@@ -58,10 +58,124 @@ def _cached_asset_data_uri(path_and_mtime: tuple[str, float]) -> tuple[str, str]
 
 
 def inject_responsive_css() -> None:
-    """Narrow-viewport tweaks via keyed containers (st-key-*) and Streamlit test ids."""
+    """Inject layout, typography, component polish, and responsive keyed-container rules."""
     st.markdown(
         """
 <style>
+/* --- Layout & page chrome --- */
+.main .block-container {
+  padding-top: 1.75rem;
+  padding-bottom: 2.5rem;
+  padding-left: max(1.25rem, 2.5vw);
+  padding-right: max(1.25rem, 2.5vw);
+}
+.dcb-page-head {
+  margin: 0 0 1.75rem 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--st-border-color);
+  max-width: 48rem;
+}
+.dcb-page-title {
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+  font-size: clamp(1.65rem, 2.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--st-text-color);
+}
+.dcb-page-subtitle {
+  margin: 0;
+  padding: 0;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--st-gray-text-color, #5c6070);
+}
+.dcb-page-subtitle strong {
+  font-weight: 600;
+  color: var(--st-text-color);
+}
+/* Section rhythm in main column only (avoids sidebar) */
+section.main h3 {
+  margin-top: 0.85rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--st-text-color);
+}
+section.main [data-testid="stCaption"] {
+  margin-top: 0.15rem;
+  margin-bottom: 0.65rem;
+  line-height: 1.45;
+  color: var(--st-gray-text-color, #5c6070);
+  font-size: 0.88rem;
+}
+/* Recommendation & list meta */
+.dcb-rec-meta {
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--st-gray-text-color, #5c6070);
+}
+.dcb-rec-meta strong {
+  font-weight: 600;
+  color: var(--st-text-color);
+}
+.dcb-section-label {
+  margin: 1rem 0 0.5rem 0;
+  padding: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--st-text-color);
+  letter-spacing: -0.01em;
+}
+/* Bordered cards (recommendations) */
+[data-testid="stVerticalBlockBorderWrapper"] {
+  border-radius: 12px !important;
+  border-color: var(--st-border-color) !important;
+  background: var(--st-secondary-background-color);
+  padding: 0.9rem 1rem 1rem !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+/* Softer row dividers between heroes */
+section.main hr {
+  margin: 1.15rem 0;
+  border: none;
+  border-top: 1px solid var(--st-border-color);
+  opacity: 0.85;
+}
+/* Alerts */
+div[data-testid="stAlert"] {
+  border-radius: 10px;
+  border: 1px solid var(--st-border-color);
+}
+div[data-testid="stAlert"] p {
+  line-height: 1.5;
+}
+/* Buttons */
+section.main .stButton > button {
+  border-radius: 10px;
+  font-weight: 500;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+section.main .stButton > button:disabled {
+  opacity: 0.55;
+}
+/* Multiselects: calmer chrome */
+section.main [data-baseweb="select"] > div {
+  border-radius: 10px !important;
+}
+section.main [data-testid="stMultiSelect"] label,
+section.main [data-testid="stMultiSelect"] [data-testid="stWidgetLabel"] {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
 @media (max-width: 900px) {
   .st-key-dcb_main_split > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"],
   .st-key-dcb_main_split > [data-testid="stHorizontalBlock"] {
@@ -156,15 +270,16 @@ def inject_responsive_css() -> None:
   color: var(--st-gray-text-color, #718096);
 }
 .dcb-title-fit {
-  margin: 0 0 0.35rem 0;
+  margin: 0 0 0.4rem 0;
   padding: 0;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
   word-break: normal !important;
   overflow-wrap: normal !important;
   hyphens: none;
   color: var(--st-heading-color, var(--st-text-color, #31333F));
-  font-size: 1.2rem;
+  font-size: 1.15rem;
 }
 @supports (font-size: 1cqi) {
   .dcb-title-fit {
@@ -182,7 +297,12 @@ def inject_responsive_css() -> None:
   background: var(--st-secondary-background-color);
   color: var(--st-text-color);
   border: 1px solid var(--st-border-color);
-  border-radius: var(--st-base-radius, 0.625rem);
+  border-radius: 10px;
+}
+.dcb-spacer-xs {
+  height: 0.55rem;
+  margin: 0;
+  padding: 0;
 }
 </style>
 """,
@@ -374,7 +494,8 @@ def render_recommendations(
                 with head[1]:
                     render_card_title_label(item_name)
                     st.markdown(
-                        f"**Counters {coverage} enemies**"
+                        f'<p class="dcb-rec-meta">Counters <strong>{coverage}</strong> enemies</p>',
+                        unsafe_allow_html=True,
                     )
                 with head[2]:
                     st.button(
@@ -389,14 +510,14 @@ def render_recommendations(
 
             render_countered_heroes_chips(game_data, countered)
             st.markdown(
-                '<div style="height:0.45rem;" aria-hidden="true"></div>',
+                '<div class="dcb-spacer-xs" aria-hidden="true"></div>',
                 unsafe_allow_html=True,
             )
 
     for row_start in range(0, len(rows), 2):
         pair = rows[row_start : row_start + 2]
         with st.container(key=f"dcb_rec_pair_{row_start}"):
-            cols = st.columns(2, gap="medium")
+            cols = st.columns(2, gap="large")
             for col, row in zip(cols, pair):
                 with col:
                     render_one_recommendation_card(row)
@@ -434,7 +555,10 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
         st.caption("No items marked yet — recommendations show every counter item.")
         return
 
-    st.markdown("**Owned items**")
+    st.markdown(
+        '<p class="dcb-section-label">Owned items</p>',
+        unsafe_allow_html=True,
+    )
     for row_start in range(0, len(purchased), PURCHASED_ITEMS_ICONS_PER_ROW):
         chunk = purchased[row_start : row_start + PURCHASED_ITEMS_ICONS_PER_ROW]
         cols = st.columns(len(chunk), gap="small")
@@ -468,7 +592,7 @@ def render_selected_enemies_counter_lists(
     purchased_items: Collection[str] | None = None,
 ) -> None:
     owned = frozenset(purchased_items or ())
-    st.markdown("##### Selected Enemies")
+    st.subheader("Selected Enemies")
     if not selected:
         st.caption("Pick up to 6 heroes from the list above.")
         return
@@ -541,13 +665,17 @@ def render_selected_enemies_counter_lists(
 
 
 def main() -> None:
-    st.set_page_config(page_title="Deadlock Counter Builder", page_icon="🎯", layout="wide")
+    st.set_page_config(page_title="Deadlock Counter Builder", page_icon="🍞", layout="wide")
     inject_responsive_css()
 
-    st.title("Deadlock Counter Builder")
-    st.write(
-        "Select **6** enemy heroes. Recommendations rank items by how many of those six "
-        "each item counters."
+    st.markdown(
+        """
+        <div class="dcb-page-head">
+          <h1 class="dcb-page-title">Deadlock Counter Builder</h1>
+          <p class="dcb-page-subtitle">Select <strong>6</strong> enemy heroes. Recommendations rank items by how many of those six each item counters.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     try:
@@ -569,46 +697,48 @@ def main() -> None:
     with st.container(key="dcb_main_split"):
         left, right = st.columns([1, 1.35], gap="large")
 
-    with left:
-        st.subheader("Enemy gamers")
+        with left:
+            st.subheader("Enemy gamers")
 
-        with st.container(key="dcb_enemy_pick_row"):
-            selected = st.multiselect(
-                "Choose enemy heroes",
-                options=all_heroes,
-                default=st.session_state.get("enemy_selection", []),
-                max_selections=MAX_SELECTIONS,
-                key="enemy_selection",
-                placeholder="Type to filter heroes…",
-                help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
-            )
+            with st.container(key="dcb_enemy_pick_row"):
+                selected = st.multiselect(
+                    "Choose enemy heroes",
+                    options=all_heroes,
+                    default=st.session_state.get("enemy_selection", []),
+                    max_selections=MAX_SELECTIONS,
+                    key="enemy_selection",
+                    placeholder="Type to filter heroes…",
+                    help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
+                )
 
-        render_selected_enemies_counter_lists(
-            selected,
-            game_data,
-            item_icon_index,
-            purchased_items=purchased_set,
-        )
-
-        if len(selected) < MAX_SELECTIONS:
-            st.info(f"Choose **{MAX_SELECTIONS - len(selected)}** more hero(es) to see recommendations.")
-
-    with right:
-        render_purchased_items_panel(game_data, item_icon_index)
-
-        if len(selected) == MAX_SELECTIONS:
-            render_recommendations(
+            render_selected_enemies_counter_lists(
                 selected,
                 game_data,
                 item_icon_index,
-                exclude_items=purchased_set,
+                purchased_items=purchased_set,
             )
-        else:
-            st.subheader("Recommended counter items")
-            st.info(
-                f"Recommendations unlock when **{MAX_SELECTIONS}** enemies are selected. "
-                "Use the panel on the left to finish your pick."
-            )
+
+            if len(selected) < MAX_SELECTIONS:
+                st.info(
+                    f"Choose **{MAX_SELECTIONS - len(selected)}** more hero(es) to see recommendations."
+                )
+
+        with right:
+            render_purchased_items_panel(game_data, item_icon_index)
+
+            if len(selected) == MAX_SELECTIONS:
+                render_recommendations(
+                    selected,
+                    game_data,
+                    item_icon_index,
+                    exclude_items=purchased_set,
+                )
+            else:
+                st.subheader("Recommended counter items")
+                st.info(
+                    f"Recommendations unlock when **{MAX_SELECTIONS}** enemies are selected. "
+                    "Use the panel on the left to finish your pick."
+                )
 
 
 if __name__ == "__main__":
