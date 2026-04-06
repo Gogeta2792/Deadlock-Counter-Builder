@@ -200,6 +200,11 @@ def _recommendation_add_button_key(item_name: str) -> str:
     return f"rec_add_{digest}"
 
 
+def _selected_enemy_toggle_key(hero_idx: int, row_start: int, slot: int, item_name: str) -> str:
+    digest = hashlib.sha256(item_name.encode("utf-8")).hexdigest()[:12]
+    return f"se_toggle_{hero_idx}_{row_start}_{slot}_{digest}"
+
+
 def add_purchased_item(item_name: str) -> None:
     if item_name in _ITEMS_EXCLUDED_FROM_PURCHASED:
         return
@@ -212,7 +217,7 @@ def add_purchased_item(item_name: str) -> None:
     st.session_state.purchased_items = cur
 
 
-def remove_purchased_item(item_name: str) -> None:
+def sell_purchased_item(item_name: str) -> None:
     cur = list(st.session_state.get("purchased_items", []))
     st.session_state.purchased_items = [x for x in cur if x != item_name]
 
@@ -323,7 +328,6 @@ def render_recommendations(
     st.subheader("Recommended counter items")
     st.caption(
         "Sorted by how many of your selected enemies each item counters. "
-        "Items that only counter one enemy are listed under that hero in **Selected Enemies**."
     )
 
     if not rows:
@@ -448,9 +452,9 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
                     width=PURCHASED_ITEM_ICON_WIDTH,
                 )
                 st.button(
-                    "Remove",
+                    "Sell",
                     key=_purchased_item_button_key(item_name),
-                    on_click=remove_purchased_item,
+                    on_click=sell_purchased_item,
                     args=(item_name,),
                     type="secondary",
                 )
@@ -471,6 +475,8 @@ def render_selected_enemies_counter_lists(
 
     for i, hero_name in enumerate(selected):
         items = counter_items_for_hero(game_data, hero_name)
+        cur_purchased = list(st.session_state.get("purchased_items", []))
+        at_owned_cap = len(cur_purchased) >= MAX_PURCHASED_ITEMS
         with st.container(key=f"dcb_hero_row_{i}"):
             sub = st.columns([0.14, 0.86], gap="small")
             with sub[0]:
@@ -490,7 +496,7 @@ def render_selected_enemies_counter_lists(
                                 row_start : row_start + SELECTED_ENEMY_ITEM_ICONS_PER_ROW
                             ]
                             cols = st.columns(len(chunk), gap="small")
-                            for col, it in zip(cols, chunk):
+                            for slot, (col, it) in enumerate(zip(cols, chunk)):
                                 with col:
                                     render_image_or_fallback(
                                         rel_path=item_icon_path(
@@ -503,6 +509,31 @@ def render_selected_enemies_counter_lists(
                                         width=PER_HERO_ITEM_ICON_WIDTH,
                                         greyed_out=it in owned,
                                     )
+                                    owned_here = it in owned
+                                    excluded = it in _ITEMS_EXCLUDED_FROM_PURCHASED
+                                    toggle_key = _selected_enemy_toggle_key(i, row_start, slot, it)
+                                    if owned_here:
+                                        st.button(
+                                            "Sell",
+                                            key=toggle_key,
+                                            on_click=sell_purchased_item,
+                                            args=(it,),
+                                            type="secondary",
+                                            use_container_width=True,
+                                        )
+                                    else:
+                                        buy_disabled = excluded or (
+                                            at_owned_cap and it not in cur_purchased
+                                        )
+                                        st.button(
+                                            "Buy",
+                                            key=toggle_key,
+                                            on_click=add_purchased_item,
+                                            args=(it,),
+                                            type="secondary",
+                                            use_container_width=True,
+                                            disabled=buy_disabled,
+                                        )
                     else:
                         st.caption("No items listed for this hero.")
         if i < len(selected) - 1:
