@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import html
 from pathlib import Path
+from typing import Collection
 
 import streamlit as st
 
@@ -25,7 +27,27 @@ MAX_SELECTIONS = 6
 
 HERO_ICON_WIDTH = 56
 ITEM_ICON_WIDTH = 52
+PURCHASED_ITEM_ICON_WIDTH = 48
 PER_HERO_ITEM_ICONS_PER_ROW = 10
+PURCHASED_ITEMS_ICONS_PER_ROW = 5
+
+# Placeholder entries in JSON — not assignable to heroes; omit from "purchased" picker.
+_ITEMS_EXCLUDED_FROM_PURCHASED: frozenset[str] = frozenset(
+    {
+        "(Example) New Item Alpha",
+        "(Example) New Item Beta",
+    }
+)
+
+
+def _purchased_item_button_key(item_name: str) -> str:
+    digest = hashlib.sha256(item_name.encode("utf-8")).hexdigest()[:16]
+    return f"purch_rm_{digest}"
+
+
+def remove_purchased_item(item_name: str) -> None:
+    cur = list(st.session_state.get("purchased_items", []))
+    st.session_state.purchased_items = [x for x in cur if x != item_name]
 
 
 @st.cache_data
@@ -111,16 +133,27 @@ def render_countered_heroes_chips(game_data: dict, hero_names: list[str]) -> Non
 
 
 def render_recommendations(
-    selected: list[str], game_data: dict, item_icon_index: dict[str, str]
+    selected: list[str],
+    game_data: dict,
+    item_icon_index: dict[str, str],
+    *,
+    exclude_items: Collection[str] | None = None,
 ) -> None:
     n = len(selected)
-    rows = recommend_items(selected, game_data)
+    skip = frozenset(exclude_items or ())
+    rows = [r for r in recommend_items(selected, game_data) if r["item"] not in skip]
 
     st.subheader("Recommended counter items")
     st.caption("Sorted by how many of your selected enemies each item counters.")
 
     if not rows:
-        st.info("No counter items were found for the current selection.")
+        if skip:
+            st.info(
+                "No counter items left to show — try removing some items from **Already owned**, "
+                "or your selection may not share any remaining counters."
+            )
+        else:
+            st.info("No counter items were found for the current selection.")
         return
 
     for row in rows:
@@ -166,6 +199,60 @@ def render_recommendations(
 
             st.markdown("**Covered heroes**")
             render_countered_heroes_chips(game_data, countered)
+
+
+def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str]) -> None:
+    """Let the player mark items they already bought; those are hidden from recommendations."""
+    st.subheader("Purchased items")
+
+    all_item_names = sorted(game_data["items"].keys())
+    if "purchased_items" not in st.session_state:
+        st.session_state.purchased_items = []
+    else:
+        cleaned = [x for x in st.session_state.purchased_items if x not in _ITEMS_EXCLUDED_FROM_PURCHASED]
+        if len(cleaned) != len(st.session_state.purchased_items):
+            st.session_state.purchased_items = cleaned
+
+    purchasable_item_names = [n for n in all_item_names if n not in _ITEMS_EXCLUDED_FROM_PURCHASED]
+
+    st.multiselect(
+        "Items you already bought",
+        options=purchasable_item_names,
+        key="purchased_items",
+        placeholder="Add items you already own…",
+        help="Selected items use icons from assets/items when available.",
+    )
+
+    purchased: list[str] = list(st.session_state.get("purchased_items", []))
+    if not purchased:
+        st.caption("No items marked yet — recommendations show every counter item.")
+        return
+
+    st.markdown("**Owned items**")
+    for row_start in range(0, len(purchased), PURCHASED_ITEMS_ICONS_PER_ROW):
+        chunk = purchased[row_start : row_start + PURCHASED_ITEMS_ICONS_PER_ROW]
+        cols = st.columns(len(chunk), gap="small")
+        for col, item_name in zip(cols, chunk):
+            with col:
+                item_rel = item_icon_path(
+                    game_data,
+                    item_name,
+                    project_root=PROJECT_ROOT,
+                    categorized_index=item_icon_index,
+                )
+                render_image_or_fallback(
+                    rel_path=item_rel,
+                    fallback_text=item_name,
+                    width=PURCHASED_ITEM_ICON_WIDTH,
+                )
+                st.caption(item_name)
+                st.button(
+                    "Remove",
+                    key=_purchased_item_button_key(item_name),
+                    on_click=remove_purchased_item,
+                    args=(item_name,),
+                    type="secondary",
+                )
 
 
 def render_per_hero_breakdown(
@@ -257,8 +344,16 @@ def main() -> None:
             render_per_hero_breakdown(selected, game_data, item_icon_index)
 
     with right:
+        render_purchased_items_panel(game_data, item_icon_index)
+        purchased_set = set(st.session_state.get("purchased_items", []))
+
         if len(selected) == MAX_SELECTIONS:
-            render_recommendations(selected, game_data, item_icon_index)
+            render_recommendations(
+                selected,
+                game_data,
+                item_icon_index,
+                exclude_items=purchased_set,
+            )
         else:
             st.subheader("Recommended counter items")
             st.info(
