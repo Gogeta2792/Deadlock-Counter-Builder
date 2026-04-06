@@ -43,6 +43,19 @@ _ITEMS_EXCLUDED_FROM_PURCHASED: frozenset[str] = frozenset(
 )
 
 
+@st.cache_data(show_spinner=False)
+def _cached_asset_data_uri(path_and_mtime: tuple[str, float]) -> tuple[str, str]:
+    """Return (mime, base64) for a local asset file; mtime in the key invalidates when the file changes."""
+    path_str, _ = path_and_mtime
+    p = Path(path_str)
+    raw = p.read_bytes()
+    b64 = base64.b64encode(raw).decode("ascii")
+    mime, _ = mimetypes.guess_type(p.name)
+    if not mime:
+        mime = "image/png"
+    return mime, b64
+
+
 def inject_responsive_css() -> None:
     """Narrow-viewport tweaks via keyed containers (st-key-*) and Streamlit test ids."""
     st.markdown(
@@ -235,23 +248,24 @@ def render_image_or_fallback(
     width: int,
     greyed_out: bool = False,
 ) -> None:
-    """Show a local image if it exists under the project root; otherwise a compact text badge."""
+    """Show a local image if it exists under the project root; otherwise a compact text badge.
+
+    Icons are embedded at full file resolution and sized with CSS ``width`` (not the HTML
+    ``width`` attribute) so HiDPI displays can sample enough pixels instead of upscaling a
+    small bitmap produced by fixed-pixel image APIs.
+    """
     resolved = resolve_asset_path(PROJECT_ROOT, rel_path)
     if resolved is not None:
-        if greyed_out:
-            raw = resolved.read_bytes()
-            b64 = base64.b64encode(raw).decode("ascii")
-            mime, _ = mimetypes.guess_type(resolved.name)
-            if not mime:
-                mime = "image/png"
-            safe_title = html.escape(fallback_text, quote=True)
-            st.markdown(
-                f'<img src="data:{mime};base64,{b64}" width="{width}" title="{safe_title}" '
-                'style="opacity:0.42;filter:grayscale(1);display:block;" />',
-                unsafe_allow_html=True,
-            )
-        else:
-            st.image(str(resolved), width=width)
+        mime, b64 = _cached_asset_data_uri((str(resolved), resolved.stat().st_mtime))
+        safe_title = html.escape(fallback_text, quote=True)
+        safe_alt = safe_title
+        filter_style = "opacity:0.42;filter:grayscale(1);" if greyed_out else ""
+        st.markdown(
+            f'<img src="data:{mime};base64,{b64}" alt="{safe_alt}" title="{safe_title}" '
+            f'style="{filter_style}width:{width}px;height:auto;max-width:{width}px;'
+            'display:block;" />',
+            unsafe_allow_html=True,
+        )
         return
 
     initials = "".join(part[0] for part in fallback_text.split()[:2] if part).upper() or "?"
