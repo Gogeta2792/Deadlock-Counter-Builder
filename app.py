@@ -173,7 +173,7 @@ def render_recommendations(
             st.info("No counter items were found for the current selection.")
         return
 
-    for row in rows:
+    def render_one_recommendation_card(row: dict) -> None:
         coverage = row["coverage_count"]
         item_name = row["item"]
         countered = row["countered_heroes"]
@@ -202,7 +202,7 @@ def render_recommendations(
                     width=ITEM_ICON_WIDTH,
                 )
                 st.button(
-                    "Add to owned",
+                    "Buy",
                     key=_recommendation_add_button_key(item_name),
                     on_click=add_purchased_item,
                     args=(item_name,),
@@ -224,6 +224,13 @@ def render_recommendations(
 
             st.markdown("**Covered heroes**")
             render_countered_heroes_chips(game_data, countered)
+
+    for row_start in range(0, len(rows), 2):
+        pair = rows[row_start : row_start + 2]
+        cols = st.columns(2, gap="medium")
+        for col, row in zip(cols, pair):
+            with col:
+                render_one_recommendation_card(row)
 
 
 def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str]) -> None:
