@@ -290,37 +290,37 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
 def render_per_hero_breakdown(
     selected: list[str], game_data: dict, item_icon_index: dict[str, str]
 ) -> None:
-    with st.expander("Per-hero counter lists", expanded=False):
-        for hero_name in selected:
-            items = counter_items_for_hero(game_data, hero_name)
-            sub = st.columns([0.14, 0.86], gap="small")
-            with sub[0]:
-                render_image_or_fallback(
-                    rel_path=hero_icon_path(game_data, hero_name),
-                    fallback_text=hero_name,
-                    width=HERO_ICON_WIDTH,
-                )
-            with sub[1]:
-                st.markdown(f"**{hero_name}**")
-                if items:
-                    for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
-                        chunk = items[row_start : row_start + PER_HERO_ITEM_ICONS_PER_ROW]
-                        cols = st.columns(len(chunk), gap="small")
-                        for col, it in zip(cols, chunk):
-                            with col:
-                                render_image_or_fallback(
-                                    rel_path=item_icon_path(
-                                        game_data,
-                                        it,
-                                        project_root=PROJECT_ROOT,
-                                        categorized_index=item_icon_index,
-                                    ),
-                                    fallback_text=it,
-                                    width=36,
-                                )
-                                st.caption(it)
-                else:
-                    st.caption("No items listed for this hero.")
+    st.subheader("Per-hero counter lists")
+    for hero_name in selected:
+        items = counter_items_for_hero(game_data, hero_name)
+        sub = st.columns([0.14, 0.86], gap="small")
+        with sub[0]:
+            render_image_or_fallback(
+                rel_path=hero_icon_path(game_data, hero_name),
+                fallback_text=hero_name,
+                width=HERO_ICON_WIDTH,
+            )
+        with sub[1]:
+            st.markdown(f"**{hero_name}**")
+            if items:
+                for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
+                    chunk = items[row_start : row_start + PER_HERO_ITEM_ICONS_PER_ROW]
+                    cols = st.columns(len(chunk), gap="small")
+                    for col, it in zip(cols, chunk):
+                        with col:
+                            render_image_or_fallback(
+                                rel_path=item_icon_path(
+                                    game_data,
+                                    it,
+                                    project_root=PROJECT_ROOT,
+                                    categorized_index=item_icon_index,
+                                ),
+                                fallback_text=it,
+                                width=36,
+                            )
+                            st.caption(it)
+            else:
+                st.caption("No items listed for this hero.")
 
 
 def main() -> None:
