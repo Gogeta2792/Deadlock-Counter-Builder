@@ -43,6 +43,84 @@ _ITEMS_EXCLUDED_FROM_PURCHASED: frozenset[str] = frozenset(
 )
 
 
+def inject_responsive_css() -> None:
+    """Narrow-viewport tweaks via keyed containers (st-key-*) and Streamlit test ids."""
+    st.markdown(
+        """
+<style>
+@media (max-width: 900px) {
+  .st-key-dcb_main_split > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"],
+  .st-key-dcb_main_split > [data-testid="stHorizontalBlock"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .st-key-dcb_main_split > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+  .st-key-dcb_main_split > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+}
+/* Only the two-card row, not nested rows inside each card */
+@media (max-width: 768px) {
+  [class*="st-key-dcb_rec_pair_"] > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"],
+  [class*="st-key-dcb_rec_pair_"] > [data-testid="stHorizontalBlock"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  [class*="st-key-dcb_rec_pair_"] > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+  [class*="st-key-dcb_rec_pair_"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+@media (max-width: 640px) {
+  [class*="st-key-dcb_rh_"] > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"],
+  [class*="st-key-dcb_rh_"] > [data-testid="stHorizontalBlock"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  [class*="st-key-dcb_rh_"] > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+  [class*="st-key-dcb_rh_"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  [class*="st-key-dcb_hero_row_"] > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"],
+  [class*="st-key-dcb_hero_row_"] > [data-testid="stHorizontalBlock"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  [class*="st-key-dcb_hero_row_"] > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+  [class*="st-key-dcb_hero_row_"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+@media (max-width: 520px) {
+  .st-key-dcb_enemy_pick_row > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"],
+  .st-key-dcb_enemy_pick_row > [data-testid="stHorizontalBlock"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .st-key-dcb_enemy_pick_row > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+  .st-key-dcb_enemy_pick_row > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+.stApp [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+  min-width: min(100%, 3.25rem) !important;
+}
+.stApp img {
+  max-width: 100%;
+  height: auto;
+}
+</style>
+""",
+        unsafe_allow_html=True,
+    )
+
+
 def _purchased_item_button_key(item_name: str) -> str:
     digest = hashlib.sha256(item_name.encode("utf-8")).hexdigest()[:16]
     return f"purch_rm_{digest}"
@@ -183,44 +261,41 @@ def render_recommendations(
             categorized_index=item_icon_index,
         )
 
+        head_key = f"dcb_rh_{hashlib.sha256(item_name.encode('utf-8')).hexdigest()[:12]}"
         with st.container(border=True):
-            head = st.columns([0.12, 0.58, 0.30], gap="medium")
-            with head[0]:
-                render_image_or_fallback(
-                    rel_path=item_rel,
-                    fallback_text=item_name,
-                    width=ITEM_ICON_WIDTH,
-                )
-                st.button(
-                    "Buy",
-                    key=_recommendation_add_button_key(item_name),
-                    on_click=add_purchased_item,
-                    args=(item_name,),
-                    type="secondary",
-                    use_container_width=True,
-                )
-            with head[1]:
-                st.markdown(f"### {item_name}")
-                st.markdown(
-                    f"**Counters {coverage}/{n} selected heroes** — _{strength}_"
-                )
-                st.progress(ratio, text=f"{int(ratio * 100)}% of selected roster")
-            with head[2]:
-                st.metric(
-                    "Coverage",
-                    f"{coverage} / {n}",
-                    help="How many of your selected enemies this item counters.",
-                )
+            with st.container(key=head_key):
+                head = st.columns([0.12, 0.88], gap="medium")
+                with head[0]:
+                    render_image_or_fallback(
+                        rel_path=item_rel,
+                        fallback_text=item_name,
+                        width=ITEM_ICON_WIDTH,
+                    )
+                    st.button(
+                        "Buy",
+                        key=_recommendation_add_button_key(item_name),
+                        on_click=add_purchased_item,
+                        args=(item_name,),
+                        type="secondary",
+                        use_container_width=True,
+                    )
+                with head[1]:
+                    st.markdown(f"### {item_name}")
+                    st.markdown(
+                        f"**Counters {coverage}/{n} selected heroes** — _{strength}_"
+                    )
+                    st.progress(ratio, text=f"{int(ratio * 100)}% of selected roster")
 
             st.markdown("**Covered heroes**")
             render_countered_heroes_chips(game_data, countered)
 
     for row_start in range(0, len(rows), 2):
         pair = rows[row_start : row_start + 2]
-        cols = st.columns(2, gap="medium")
-        for col, row in zip(cols, pair):
-            with col:
-                render_one_recommendation_card(row)
+        with st.container(key=f"dcb_rec_pair_{row_start}"):
+            cols = st.columns(2, gap="medium")
+            for col, row in zip(cols, pair):
+                with col:
+                    render_one_recommendation_card(row)
 
 
 def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str]) -> None:
@@ -292,50 +367,52 @@ def render_selected_enemies_counter_lists(
 
     for i, hero_name in enumerate(selected):
         items = counter_items_for_hero(game_data, hero_name)
-        sub = st.columns([0.14, 0.86], gap="small")
-        with sub[0]:
-            render_image_or_fallback(
-                rel_path=hero_icon_path(game_data, hero_name),
-                fallback_text=hero_name,
-                width=HERO_ICON_WIDTH,
-            )
-            st.caption(hero_name)
-        with sub[1]:
-            if items:
-                for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
-                    chunk = items[row_start : row_start + PER_HERO_ITEM_ICONS_PER_ROW]
-                    cols = st.columns(len(chunk), gap="small")
-                    for col, it in zip(cols, chunk):
-                        with col:
-                            is_owned = it in owned
-                            render_image_or_fallback(
-                                rel_path=item_icon_path(
-                                    game_data,
-                                    it,
-                                    project_root=PROJECT_ROOT,
-                                    categorized_index=item_icon_index,
-                                ),
-                                fallback_text=it,
-                                width=PER_HERO_ITEM_ICON_WIDTH,
-                                greyed_out=is_owned,
-                            )
-                            if is_owned:
-                                st.markdown(
-                                    f'<p style="margin:0.15rem 0 0 0;color:#718096;'
-                                    f'font-size:0.82rem;text-decoration:line-through;">'
-                                    f"{html.escape(it)}</p>",
-                                    unsafe_allow_html=True,
+        with st.container(key=f"dcb_hero_row_{i}"):
+            sub = st.columns([0.14, 0.86], gap="small")
+            with sub[0]:
+                render_image_or_fallback(
+                    rel_path=hero_icon_path(game_data, hero_name),
+                    fallback_text=hero_name,
+                    width=HERO_ICON_WIDTH,
+                )
+                st.caption(hero_name)
+            with sub[1]:
+                if items:
+                    for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
+                        chunk = items[row_start : row_start + PER_HERO_ITEM_ICONS_PER_ROW]
+                        cols = st.columns(len(chunk), gap="small")
+                        for col, it in zip(cols, chunk):
+                            with col:
+                                is_owned = it in owned
+                                render_image_or_fallback(
+                                    rel_path=item_icon_path(
+                                        game_data,
+                                        it,
+                                        project_root=PROJECT_ROOT,
+                                        categorized_index=item_icon_index,
+                                    ),
+                                    fallback_text=it,
+                                    width=PER_HERO_ITEM_ICON_WIDTH,
+                                    greyed_out=is_owned,
                                 )
-                            else:
-                                st.caption(it)
-            else:
-                st.caption("No items listed for this hero.")
+                                if is_owned:
+                                    st.markdown(
+                                        f'<p style="margin:0.15rem 0 0 0;color:#718096;'
+                                        f'font-size:0.82rem;text-decoration:line-through;">'
+                                        f"{html.escape(it)}</p>",
+                                        unsafe_allow_html=True,
+                                    )
+                                else:
+                                    st.caption(it)
+                else:
+                    st.caption("No items listed for this hero.")
         if i < len(selected) - 1:
             st.divider()
 
 
 def main() -> None:
     st.set_page_config(page_title="Deadlock Counter Builder", page_icon="🎯", layout="wide")
+    inject_responsive_css()
 
     st.title("Deadlock Counter Builder")
     st.write(
@@ -359,30 +436,32 @@ def main() -> None:
     all_heroes = sorted_hero_names(game_data)
     purchased_set = frozenset(st.session_state.get("purchased_items", []))
 
-    left, right = st.columns([1, 1.35], gap="large")
+    with st.container(key="dcb_main_split"):
+        left, right = st.columns([1, 1.35], gap="large")
 
     with left:
         st.subheader("Enemy gamers")
 
-        sel_col, clear_col = st.columns([1, 0.22], gap="small")
-        with sel_col:
-            selected = st.multiselect(
-                "Choose enemy heroes",
-                options=all_heroes,
-                default=st.session_state.get("enemy_selection", []),
-                max_selections=MAX_SELECTIONS,
-                key="enemy_selection",
-                placeholder="Type to filter heroes…",
-                help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
-            )
-        with clear_col:
-            st.markdown('<div style="height:1.85rem;"></div>', unsafe_allow_html=True)
-            st.button(
-                "Clear",
-                on_click=reset_selection,
-                type="secondary",
-                use_container_width=True,
-            )
+        with st.container(key="dcb_enemy_pick_row"):
+            sel_col, clear_col = st.columns([1, 0.22], gap="small")
+            with sel_col:
+                selected = st.multiselect(
+                    "Choose enemy heroes",
+                    options=all_heroes,
+                    default=st.session_state.get("enemy_selection", []),
+                    max_selections=MAX_SELECTIONS,
+                    key="enemy_selection",
+                    placeholder="Type to filter heroes…",
+                    help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
+                )
+            with clear_col:
+                st.markdown('<div style="height:1.85rem;"></div>', unsafe_allow_html=True)
+                st.button(
+                    "Clear",
+                    on_click=reset_selection,
+                    type="secondary",
+                    use_container_width=True,
+                )
 
         render_selected_enemies_counter_lists(
             selected,
