@@ -142,8 +142,7 @@ def inject_responsive_css() -> None:
   word-break: normal !important;
   overflow-wrap: normal !important;
   hyphens: none;
-  color: var(--text-color, #31333F);
-  opacity: 0.65;
+  color: var(--st-gray-text-color, var(--st-text-color, #31333F));
   font-size: 0.75rem;
 }
 @supports (font-size: 1cqi) {
@@ -153,8 +152,7 @@ def inject_responsive_css() -> None:
   }
 }
 .dcb-label-fit.dcb-owned-line {
-  opacity: 1;
-  color: #718096;
+  color: var(--st-gray-text-color, #718096);
 }
 .dcb-title-fit {
   margin: 0 0 0.35rem 0;
@@ -164,7 +162,7 @@ def inject_responsive_css() -> None:
   word-break: normal !important;
   overflow-wrap: normal !important;
   hyphens: none;
-  color: var(--text-color, #31333F);
+  color: var(--st-heading-color, var(--st-text-color, #31333F));
   font-size: 1.2rem;
 }
 @supports (font-size: 1cqi) {
@@ -172,6 +170,18 @@ def inject_responsive_css() -> None:
     container-type: inline-size;
     font-size: max(0.8rem, min(1.35rem, calc(100cqi / (var(--label-chars, 8) * 0.45))));
   }
+}
+/* Missing asset: initials tile uses theme colors (fixed slate looked wrong in dark mode). */
+.dcb-icon-fallback-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-weight: 700;
+  background: var(--st-secondary-background-color);
+  color: var(--st-text-color);
+  border: 1px solid var(--st-border-color);
+  border-radius: var(--st-base-radius, 0.625rem);
 }
 </style>
 """,
@@ -276,12 +286,9 @@ def render_image_or_fallback(
     safe_title = html.escape(fallback_text, quote=True)
     dim = "opacity:0.42;filter:grayscale(1);" if greyed_out else ""
     st.markdown(
-        f'<div title="{safe_title}" style="{dim}width:{width}px;min-height:{width}px;'
-        f"max-height:{width}px;display:flex;align-items:center;justify-content:center;"
-        "background:linear-gradient(145deg,#2d3748,#1a202c);color:#e2e8f0;"
-        f"border-radius:10px;font-weight:700;font-size:{max(11, width // 5)}px;"
-        'border:1px solid #4a5568;">'
-        f"{initials}</div>",
+        f'<div class="dcb-icon-fallback-badge" title="{safe_title}" style="{dim}'
+        f"width:{width}px;min-height:{width}px;max-height:{width}px;"
+        f'font-size:{max(11, width // 5)}px;">{initials}</div>',
         unsafe_allow_html=True,
     )
 
@@ -299,7 +306,6 @@ def render_countered_heroes_chips(game_data: dict, hero_names: list[str]) -> Non
                 fallback_text=hero_name,
                 width=40,
             )
-            render_icon_caption_label(hero_name)
 
 
 def render_recommendations(
