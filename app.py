@@ -30,7 +30,7 @@ MAX_SELECTIONS = 6
 HERO_ICON_WIDTH = 56
 ITEM_ICON_WIDTH = 52
 PURCHASED_ITEM_ICON_WIDTH = 48
-PER_HERO_ITEM_ICONS_PER_ROW = 8
+SELECTED_ENEMY_ITEM_ICONS_PER_ROW = 10
 PER_HERO_ITEM_ICON_WIDTH = 48
 PURCHASED_ITEMS_ICONS_PER_ROW = 5
 
@@ -123,6 +123,10 @@ def inject_responsive_css() -> None:
 }
 .stApp [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
   min-width: min(100%, 3.25rem) !important;
+}
+/* Selected Enemies: counter items are icon-only; columns only need to fit the tile. */
+[class*="st-key-dcb_hero_items_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+  min-width: min(100%, 3rem) !important;
 }
 .stApp img {
   max-width: 100%;
@@ -450,36 +454,30 @@ def render_selected_enemies_counter_lists(
                 )
                 render_icon_caption_label(hero_name)
             with sub[1]:
-                if items:
-                    for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
-                        chunk = items[row_start : row_start + PER_HERO_ITEM_ICONS_PER_ROW]
-                        cols = st.columns(len(chunk), gap="small")
-                        for col, it in zip(cols, chunk):
-                            with col:
-                                is_owned = it in owned
-                                render_image_or_fallback(
-                                    rel_path=item_icon_path(
-                                        game_data,
-                                        it,
-                                        project_root=PROJECT_ROOT,
-                                        categorized_index=item_icon_index,
-                                    ),
-                                    fallback_text=it,
-                                    width=PER_HERO_ITEM_ICON_WIDTH,
-                                    greyed_out=is_owned,
-                                )
-                                if is_owned:
-                                    metric = _label_fit_longest_token_len(it)
-                                    st.markdown(
-                                        f'<p class="dcb-label-fit dcb-owned-line" '
-                                        f'style="--label-chars:{metric};text-decoration:line-through;">'
-                                        f"{html.escape(it)}</p>",
-                                        unsafe_allow_html=True,
+                with st.container(key=f"dcb_hero_items_{i}"):
+                    if items:
+                        for row_start in range(
+                            0, len(items), SELECTED_ENEMY_ITEM_ICONS_PER_ROW
+                        ):
+                            chunk = items[
+                                row_start : row_start + SELECTED_ENEMY_ITEM_ICONS_PER_ROW
+                            ]
+                            cols = st.columns(len(chunk), gap="small")
+                            for col, it in zip(cols, chunk):
+                                with col:
+                                    render_image_or_fallback(
+                                        rel_path=item_icon_path(
+                                            game_data,
+                                            it,
+                                            project_root=PROJECT_ROOT,
+                                            categorized_index=item_icon_index,
+                                        ),
+                                        fallback_text=it,
+                                        width=PER_HERO_ITEM_ICON_WIDTH,
+                                        greyed_out=it in owned,
                                     )
-                                else:
-                                    render_icon_caption_label(it)
-                else:
-                    st.caption("No items listed for this hero.")
+                    else:
+                        st.caption("No items listed for this hero.")
         if i < len(selected) - 1:
             st.divider()
 
