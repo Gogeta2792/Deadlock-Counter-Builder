@@ -349,16 +349,23 @@ def render_recommendations(
         head_key = f"dcb_rh_{hashlib.sha256(item_name.encode('utf-8')).hexdigest()[:12]}"
         with st.container(border=True):
             with st.container(key=head_key):
-                head = st.columns([0.12, 0.88], gap="medium")
+                at_owned_cap = (
+                    len(st.session_state.get("purchased_items", [])) >= MAX_PURCHASED_ITEMS
+                )
+                # Icon | rationale (name + coverage) | Buy — one row, no tall icon+button rail.
+                head = st.columns([0.14, 0.66, 0.20], gap="small")
                 with head[0]:
                     render_image_or_fallback(
                         rel_path=item_rel,
                         fallback_text=item_name,
                         width=ITEM_ICON_WIDTH,
                     )
-                    at_owned_cap = (
-                        len(st.session_state.get("purchased_items", [])) >= MAX_PURCHASED_ITEMS
+                with head[1]:
+                    render_card_title_label(item_name)
+                    st.markdown(
+                        f"**Counters {coverage} enemies**"
                     )
+                with head[2]:
                     st.button(
                         "Buy",
                         key=_recommendation_add_button_key(item_name),
@@ -368,15 +375,10 @@ def render_recommendations(
                         use_container_width=True,
                         disabled=at_owned_cap,
                     )
-                with head[1]:
-                    render_card_title_label(item_name)
-                    st.markdown(
-                        f"**Counters {coverage}/{n} selected heroes**"
-                    )
 
             render_countered_heroes_chips(game_data, countered)
             st.markdown(
-                '<div style="height:0.65rem;" aria-hidden="true"></div>',
+                '<div style="height:0.45rem;" aria-hidden="true"></div>',
                 unsafe_allow_html=True,
             )
 
