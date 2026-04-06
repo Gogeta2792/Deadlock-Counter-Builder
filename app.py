@@ -26,6 +26,7 @@ from utils.recommender import recommend_items
 PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_PATH = PROJECT_ROOT / "data" / "character_counters.json"
 MAX_SELECTIONS = 6
+MAX_PURCHASED_ITEMS = 12
 
 HERO_ICON_WIDTH = 56
 ITEM_ICON_WIDTH = 52
@@ -203,9 +204,12 @@ def add_purchased_item(item_name: str) -> None:
     if item_name in _ITEMS_EXCLUDED_FROM_PURCHASED:
         return
     cur = list(st.session_state.get("purchased_items", []))
-    if item_name not in cur:
-        cur.append(item_name)
-        st.session_state.purchased_items = cur
+    if item_name in cur:
+        return
+    if len(cur) >= MAX_PURCHASED_ITEMS:
+        return
+    cur.append(item_name)
+    st.session_state.purchased_items = cur
 
 
 def remove_purchased_item(item_name: str) -> None:
@@ -221,10 +225,6 @@ def get_game_data_cached(path_str: str) -> dict:
 @st.cache_data
 def get_item_icon_index_cached(root_str: str) -> dict[str, str]:
     return build_categorized_item_icon_index(Path(root_str))
-
-
-def reset_selection() -> None:
-    st.session_state["enemy_selection"] = []
 
 
 def _label_fit_longest_token_len(text: str) -> int:
@@ -356,6 +356,9 @@ def render_recommendations(
                         fallback_text=item_name,
                         width=ITEM_ICON_WIDTH,
                     )
+                    at_owned_cap = (
+                        len(st.session_state.get("purchased_items", [])) >= MAX_PURCHASED_ITEMS
+                    )
                     st.button(
                         "Buy",
                         key=_recommendation_add_button_key(item_name),
@@ -363,6 +366,7 @@ def render_recommendations(
                         args=(item_name,),
                         type="secondary",
                         use_container_width=True,
+                        disabled=at_owned_cap,
                     )
                 with head[1]:
                     render_card_title_label(item_name)
@@ -371,6 +375,10 @@ def render_recommendations(
                     )
 
             render_countered_heroes_chips(game_data, countered)
+            st.markdown(
+                '<div style="height:0.65rem;" aria-hidden="true"></div>',
+                unsafe_allow_html=True,
+            )
 
     for row_start in range(0, len(rows), 2):
         pair = rows[row_start : row_start + 2]
@@ -390,8 +398,9 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
         st.session_state.purchased_items = []
     else:
         cleaned = [x for x in st.session_state.purchased_items if x not in _ITEMS_EXCLUDED_FROM_PURCHASED]
-        if len(cleaned) != len(st.session_state.purchased_items):
-            st.session_state.purchased_items = cleaned
+        capped = cleaned[:MAX_PURCHASED_ITEMS]
+        if capped != st.session_state.purchased_items:
+            st.session_state.purchased_items = list(capped)
 
     purchasable_item_names = [n for n in all_item_names if n not in _ITEMS_EXCLUDED_FROM_PURCHASED]
 
@@ -399,8 +408,12 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
         "Items you already bought",
         options=purchasable_item_names,
         key="purchased_items",
+        max_selections=MAX_PURCHASED_ITEMS,
         placeholder="Add items you already own…",
-        help="Selected items use icons from assets/items when available.",
+        help=(
+            f"Up to {MAX_PURCHASED_ITEMS} owned items. "
+            "Selected items use icons from assets/items when available."
+        ),
     )
 
     purchased: list[str] = list(st.session_state.get("purchased_items", []))
@@ -425,7 +438,6 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
                     fallback_text=item_name,
                     width=PURCHASED_ITEM_ICON_WIDTH,
                 )
-                render_icon_caption_label(item_name)
                 st.button(
                     "Remove",
                     key=_purchased_item_button_key(item_name),
@@ -521,25 +533,15 @@ def main() -> None:
         st.subheader("Enemy gamers")
 
         with st.container(key="dcb_enemy_pick_row"):
-            sel_col, clear_col = st.columns([1, 0.22], gap="small")
-            with sel_col:
-                selected = st.multiselect(
-                    "Choose enemy heroes",
-                    options=all_heroes,
-                    default=st.session_state.get("enemy_selection", []),
-                    max_selections=MAX_SELECTIONS,
-                    key="enemy_selection",
-                    placeholder="Type to filter heroes…",
-                    help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
-                )
-            with clear_col:
-                st.markdown('<div style="height:1.85rem;"></div>', unsafe_allow_html=True)
-                st.button(
-                    "Clear",
-                    on_click=reset_selection,
-                    type="secondary",
-                    use_container_width=True,
-                )
+            selected = st.multiselect(
+                "Choose enemy heroes",
+                options=all_heroes,
+                default=st.session_state.get("enemy_selection", []),
+                max_selections=MAX_SELECTIONS,
+                key="enemy_selection",
+                placeholder="Type to filter heroes…",
+                help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
+            )
 
         render_selected_enemies_counter_lists(
             selected,
