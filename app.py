@@ -391,6 +391,22 @@ section.main [data-testid="stMultiSelect"] [data-testid="stWidgetLabel"] {
 .dcb-label-fit.dcb-owned-line {
   color: var(--st-gray-text-color, #718096);
 }
+.dcb-label-fit-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.dcb-label-fit.dcb-hero-name {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.5rem auto 0 auto;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
 .dcb-title-fit {
   margin: 0 0 0.4rem 0;
   padding: 0;
@@ -400,7 +416,8 @@ section.main [data-testid="stMultiSelect"] [data-testid="stWidgetLabel"] {
   word-break: normal !important;
   overflow-wrap: normal !important;
   hyphens: none;
-  color: var(--st-heading-color, var(--st-text-color, #31333F));
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   font-size: 1.15rem;
 }
 @supports (font-size: 1cqi) {
@@ -499,7 +516,7 @@ def render_icon_caption_label(text: str) -> None:
     metric = _label_fit_longest_token_len(text)
     escaped = html.escape(text)
     st.markdown(
-        f'<div class="dcb-label-fit" style="--label-chars:{metric}">{escaped}</div>',
+        f'<div class="dcb-label-fit-wrap"><div class="dcb-label-fit dcb-hero-name" style="--label-chars:{metric}">{escaped}</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -709,6 +726,10 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
                     fallback_text=item_name,
                     width=PURCHASED_ITEM_ICON_WIDTH,
                 )
+                st.markdown(
+                    '<div class="dcb-spacer-xs" aria-hidden="true"></div>',
+                    unsafe_allow_html=True,
+                )
                 st.button(
                     "Sell",
                     key=_purchased_item_button_key(item_name),
@@ -766,6 +787,10 @@ def render_selected_enemies_counter_lists(
                                         fallback_text=it,
                                         width=PER_HERO_ITEM_ICON_WIDTH,
                                         greyed_out=it in owned,
+                                    )
+                                    st.markdown(
+                                        '<div class="dcb-spacer-xs" aria-hidden="true"></div>',
+                                        unsafe_allow_html=True,
                                     )
                                     owned_here = it in owned
                                     excluded = it in _ITEMS_EXCLUDED_FROM_PURCHASED
