@@ -45,6 +45,20 @@ def _purchased_item_button_key(item_name: str) -> str:
     return f"purch_rm_{digest}"
 
 
+def _recommendation_add_button_key(item_name: str) -> str:
+    digest = hashlib.sha256(item_name.encode("utf-8")).hexdigest()[:16]
+    return f"rec_add_{digest}"
+
+
+def add_purchased_item(item_name: str) -> None:
+    if item_name in _ITEMS_EXCLUDED_FROM_PURCHASED:
+        return
+    cur = list(st.session_state.get("purchased_items", []))
+    if item_name not in cur:
+        cur.append(item_name)
+        st.session_state.purchased_items = cur
+
+
 def remove_purchased_item(item_name: str) -> None:
     cur = list(st.session_state.get("purchased_items", []))
     st.session_state.purchased_items = [x for x in cur if x != item_name]
@@ -144,7 +158,10 @@ def render_recommendations(
     rows = [r for r in recommend_items(selected, game_data) if r["item"] not in skip]
 
     st.subheader("Recommended counter items")
-    st.caption("Sorted by how many of your selected enemies each item counters.")
+    st.caption(
+        "Sorted by how many of your selected enemies each item counters. "
+        "Use **Add to owned** under an item to move it to **Purchased items** without the dropdown."
+    )
 
     if not rows:
         if skip:
@@ -183,6 +200,14 @@ def render_recommendations(
                     rel_path=item_rel,
                     fallback_text=item_name,
                     width=ITEM_ICON_WIDTH,
+                )
+                st.button(
+                    "Add to owned",
+                    key=_recommendation_add_button_key(item_name),
+                    on_click=add_purchased_item,
+                    args=(item_name,),
+                    type="secondary",
+                    use_container_width=True,
                 )
             with head[1]:
                 st.markdown(f"### {item_name}")
