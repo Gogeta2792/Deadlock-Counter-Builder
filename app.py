@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import html
+import mimetypes
 from pathlib import Path
 from typing import Collection
 
@@ -28,7 +30,8 @@ MAX_SELECTIONS = 6
 HERO_ICON_WIDTH = 56
 ITEM_ICON_WIDTH = 52
 PURCHASED_ITEM_ICON_WIDTH = 48
-PER_HERO_ITEM_ICONS_PER_ROW = 10
+PER_HERO_ITEM_ICONS_PER_ROW = 8
+PER_HERO_ITEM_ICON_WIDTH = 48
 PURCHASED_ITEMS_ICONS_PER_ROW = 5
 
 # Placeholder entries in JSON — not assignable to heroes; omit from "purchased" picker.
@@ -83,17 +86,32 @@ def render_image_or_fallback(
     rel_path: str,
     fallback_text: str,
     width: int,
+    greyed_out: bool = False,
 ) -> None:
     """Show a local image if it exists under the project root; otherwise a compact text badge."""
     resolved = resolve_asset_path(PROJECT_ROOT, rel_path)
     if resolved is not None:
-        st.image(str(resolved), width=width)
+        if greyed_out:
+            raw = resolved.read_bytes()
+            b64 = base64.b64encode(raw).decode("ascii")
+            mime, _ = mimetypes.guess_type(resolved.name)
+            if not mime:
+                mime = "image/png"
+            safe_title = html.escape(fallback_text, quote=True)
+            st.markdown(
+                f'<img src="data:{mime};base64,{b64}" width="{width}" title="{safe_title}" '
+                'style="opacity:0.42;filter:grayscale(1);display:block;" />',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.image(str(resolved), width=width)
         return
 
     initials = "".join(part[0] for part in fallback_text.split()[:2] if part).upper() or "?"
     safe_title = html.escape(fallback_text, quote=True)
+    dim = "opacity:0.42;filter:grayscale(1);" if greyed_out else ""
     st.markdown(
-        f'<div title="{safe_title}" style="width:{width}px;min-height:{width}px;'
+        f'<div title="{safe_title}" style="{dim}width:{width}px;min-height:{width}px;'
         f"max-height:{width}px;display:flex;align-items:center;justify-content:center;"
         "background:linear-gradient(145deg,#2d3748,#1a202c);color:#e2e8f0;"
         f"border-radius:10px;font-weight:700;font-size:{max(11, width // 5)}px;"
@@ -160,7 +178,6 @@ def render_recommendations(
     st.subheader("Recommended counter items")
     st.caption(
         "Sorted by how many of your selected enemies each item counters. "
-        "Use **Add to owned** under an item to move it to **Purchased items** without the dropdown."
     )
 
     if not rows:
@@ -288,10 +305,15 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
 
 
 def render_per_hero_breakdown(
-    selected: list[str], game_data: dict, item_icon_index: dict[str, str]
+    selected: list[str],
+    game_data: dict,
+    item_icon_index: dict[str, str],
+    *,
+    purchased_items: Collection[str] | None = None,
 ) -> None:
+    owned = frozenset(purchased_items or ())
     st.subheader("Per-hero counter lists")
-    for hero_name in selected:
+    for i, hero_name in enumerate(selected):
         items = counter_items_for_hero(game_data, hero_name)
         sub = st.columns([0.14, 0.86], gap="small")
         with sub[0]:
@@ -301,13 +323,13 @@ def render_per_hero_breakdown(
                 width=HERO_ICON_WIDTH,
             )
         with sub[1]:
-            st.markdown(f"**{hero_name}**")
             if items:
                 for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
                     chunk = items[row_start : row_start + PER_HERO_ITEM_ICONS_PER_ROW]
                     cols = st.columns(len(chunk), gap="small")
                     for col, it in zip(cols, chunk):
                         with col:
+                            is_owned = it in owned
                             render_image_or_fallback(
                                 rel_path=item_icon_path(
                                     game_data,
@@ -316,11 +338,22 @@ def render_per_hero_breakdown(
                                     categorized_index=item_icon_index,
                                 ),
                                 fallback_text=it,
-                                width=36,
+                                width=PER_HERO_ITEM_ICON_WIDTH,
+                                greyed_out=is_owned,
                             )
-                            st.caption(it)
+                            if is_owned:
+                                st.markdown(
+                                    f'<p style="margin:0.15rem 0 0 0;color:#718096;'
+                                    f'font-size:0.82rem;text-decoration:line-through;">'
+                                    f"{html.escape(it)}</p>",
+                                    unsafe_allow_html=True,
+                                )
+                            else:
+                                st.caption(it)
             else:
                 st.caption("No items listed for this hero.")
+        if i < len(selected) - 1:
+            st.divider()
 
 
 def main() -> None:
@@ -346,6 +379,7 @@ def main() -> None:
 
     item_icon_index = get_item_icon_index_cached(str(PROJECT_ROOT))
     all_heroes = sorted_hero_names(game_data)
+    purchased_set = frozenset(st.session_state.get("purchased_items", []))
 
     left, right = st.columns([1, 1.35], gap="large")
 
@@ -373,11 +407,15 @@ def main() -> None:
         if len(selected) < MAX_SELECTIONS:
             st.info(f"Choose **{MAX_SELECTIONS - len(selected)}** more hero(es) to see recommendations.")
         elif len(selected) == MAX_SELECTIONS:
-            render_per_hero_breakdown(selected, game_data, item_icon_index)
+            render_per_hero_breakdown(
+                selected,
+                game_data,
+                item_icon_index,
+                purchased_items=purchased_set,
+            )
 
     with right:
         render_purchased_items_panel(game_data, item_icon_index)
-        purchased_set = set(st.session_state.get("purchased_items", []))
 
         if len(selected) == MAX_SELECTIONS:
             render_recommendations(
