@@ -378,7 +378,7 @@ def main() -> None:
         with clear_col:
             st.markdown('<div style="height:1.85rem;"></div>', unsafe_allow_html=True)
             st.button(
-                "Clear selection",
+                "Clear",
                 on_click=reset_selection,
                 type="secondary",
                 use_container_width=True,
