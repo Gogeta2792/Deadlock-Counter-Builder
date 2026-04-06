@@ -121,33 +121,6 @@ def render_image_or_fallback(
     )
 
 
-def render_hero_row(hero_name: str, game_data: dict) -> None:
-    rel = hero_icon_path(game_data, hero_name)
-    c_img, c_name = st.columns([0.22, 0.78], gap="small")
-    with c_img:
-        render_image_or_fallback(
-            rel_path=rel,
-            fallback_text=hero_name,
-            width=HERO_ICON_WIDTH,
-        )
-    with c_name:
-        st.markdown(f"**{hero_name}**")
-
-
-def render_selected_heroes_panel(selected: list[str], game_data: dict) -> None:
-    st.markdown("##### Selected enemies")
-    if not selected:
-        st.caption("Pick up to 6 heroes from the list above.")
-        return
-
-    for row_start in range(0, len(selected), 3):
-        chunk = selected[row_start : row_start + 3]
-        cols = st.columns(len(chunk), gap="small")
-        for col, hero_name in zip(cols, chunk):
-            with col:
-                render_hero_row(hero_name, game_data)
-
-
 def render_countered_heroes_chips(game_data: dict, hero_names: list[str]) -> None:
     """Small icon + name for each hero this item counters."""
     if not hero_names:
@@ -304,7 +277,7 @@ def render_purchased_items_panel(game_data: dict, item_icon_index: dict[str, str
                 )
 
 
-def render_per_hero_breakdown(
+def render_selected_enemies_counter_lists(
     selected: list[str],
     game_data: dict,
     item_icon_index: dict[str, str],
@@ -312,7 +285,11 @@ def render_per_hero_breakdown(
     purchased_items: Collection[str] | None = None,
 ) -> None:
     owned = frozenset(purchased_items or ())
-    st.subheader("Per-hero counter lists")
+    st.markdown("##### Selected Enemies")
+    if not selected:
+        st.caption("Pick up to 6 heroes from the list above.")
+        return
+
     for i, hero_name in enumerate(selected):
         items = counter_items_for_hero(game_data, hero_name)
         sub = st.columns([0.14, 0.86], gap="small")
@@ -322,6 +299,7 @@ def render_per_hero_breakdown(
                 fallback_text=hero_name,
                 width=HERO_ICON_WIDTH,
             )
+            st.caption(hero_name)
         with sub[1]:
             if items:
                 for row_start in range(0, len(items), PER_HERO_ITEM_ICONS_PER_ROW):
@@ -386,33 +364,35 @@ def main() -> None:
     with left:
         st.subheader("Enemy gamers")
 
-        selected = st.multiselect(
-            "Choose enemy heroes",
-            options=all_heroes,
-            default=st.session_state.get("enemy_selection", []),
-            max_selections=MAX_SELECTIONS,
-            key="enemy_selection",
-            placeholder="Type to filter heroes…",
-            help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
+        sel_col, clear_col = st.columns([1, 0.22], gap="small")
+        with sel_col:
+            selected = st.multiselect(
+                "Choose enemy heroes",
+                options=all_heroes,
+                default=st.session_state.get("enemy_selection", []),
+                max_selections=MAX_SELECTIONS,
+                key="enemy_selection",
+                placeholder="Type to filter heroes…",
+                help=f"Select exactly {MAX_SELECTIONS} heroes to unlock ranked items.",
+            )
+        with clear_col:
+            st.markdown('<div style="height:1.85rem;"></div>', unsafe_allow_html=True)
+            st.button(
+                "Clear selection",
+                on_click=reset_selection,
+                type="secondary",
+                use_container_width=True,
+            )
+
+        render_selected_enemies_counter_lists(
+            selected,
+            game_data,
+            item_icon_index,
+            purchased_items=purchased_set,
         )
-
-        m1, m2 = st.columns(2)
-        with m1:
-            st.metric("Selected", f"{len(selected)} / {MAX_SELECTIONS}")
-        with m2:
-            st.button("Clear selection", on_click=reset_selection, type="secondary")
-
-        render_selected_heroes_panel(selected, game_data)
 
         if len(selected) < MAX_SELECTIONS:
             st.info(f"Choose **{MAX_SELECTIONS - len(selected)}** more hero(es) to see recommendations.")
-        elif len(selected) == MAX_SELECTIONS:
-            render_per_hero_breakdown(
-                selected,
-                game_data,
-                item_icon_index,
-                purchased_items=purchased_set,
-            )
 
     with right:
         render_purchased_items_panel(game_data, item_icon_index)
