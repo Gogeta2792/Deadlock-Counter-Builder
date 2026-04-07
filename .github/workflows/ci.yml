@@ -1,0 +1,50 @@
+# Install deps, compile Python, validate game JSON + recommender on push/PR.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Byte-compile Python
+        run: python -m compileall -q app.py utils
+
+      - name: Validate data and recommender
+        run: |
+          python << 'EOF'
+          from pathlib import Path
+
+          from utils.data_loader import load_game_data, sorted_hero_names
+          from utils.recommender import recommend_items
+
+          root = Path.cwd()
+          data_path = root / "data" / "character_counters.json"
+          game = load_game_data(data_path)
+          heroes = sorted_hero_names(game)
+          assert len(heroes) >= 6, "Need at least 6 heroes for smoke test"
+          rows = recommend_items(heroes[:6], game)
+          assert isinstance(rows, list)
+          print(f"OK: {len(heroes)} heroes, sample recommendation rows: {len(rows)}")
+          EOF
