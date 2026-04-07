@@ -365,6 +365,14 @@ section.main [data-testid="stMultiSelect"] [data-testid="stWidgetLabel"] {
 [class*="st-key-dcb_hero_items_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
   min-width: min(100%, 3rem) !important;
 }
+/* Selected Enemies: keep hero name centered under the portrait, but drop it to button row. */
+[class*="st-key-dcb_hero_row_"] [data-testid="stColumn"]:first-child .dcb-label-fit.dcb-hero-name {
+  margin-top: 1.9rem;
+}
+/* Selected Enemies: nudge hero name left to align with portrait. */
+[class*="st-key-dcb_hero_row_"] [data-testid="stColumn"]:first-child .dcb-label-fit-wrap {
+  transform: translateX(-18px);
+}
 .stApp img {
   max-width: 100%;
   height: auto;
@@ -764,7 +772,6 @@ def render_selected_enemies_counter_lists(
                     fallback_text=hero_name,
                     width=HERO_ICON_WIDTH,
                 )
-                render_icon_caption_label(hero_name)
             with sub[1]:
                 with st.container(key=f"dcb_hero_items_{i}"):
                     if items:
